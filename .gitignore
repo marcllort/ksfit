@@ -1,0 +1,45 @@
+# secrets / credentials
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# editors
+.idea/
+.vscode/
+
+# Playwright
+.playwright-mcp/
+/playwright-report/
+/test-results/
+playwright/.auth/
+
+# Node / Next.js (web/)
+node_modules/
+web/.next/
+web/out/
+*.tsbuildinfo
+next-env.d.ts
+
+# project output
+*.json.bak
+out/
+
+# local-only scratch / inspection artifacts
+apk/

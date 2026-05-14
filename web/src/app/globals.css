@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Design tokens
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Light theme — bone white over warm paper, near-black ink. */
+  --paper-0: #fafaf9; /* page bg */
+  --paper-1: #ffffff; /* card */
+  --paper-2: #f4f4f3; /* sunken */
+  --paper-3: #ececea; /* divider tint */
+  --ink-0: #0a0a09;
+  --ink-1: #1a1a18;
+  --ink-2: #3a3a36;
+  --ink-3: #6c6c66;
+  --ink-4: #9a9a93;
+  --ink-5: #c7c7bf;
+  --line: rgba(10, 10, 9, 0.07);
+  --accent: #1b1b1b;
+  --accent-fg: #f7f7f5;
+  --accent-soft: rgba(27, 27, 27, 0.08);
+  --positive: #1f8a4c;
+  --warn: #b87800;
+  --bad: #c4322b;
+  --grid: rgba(10, 10, 9, 0.06);
+  /* Heatmap ramp — quantitative, perceptually-spaced. Light mode uses a
+     cool/calm green that doesn't fight the monochrome accent. */
+  --heat-0: #ebebe7;
+  --heat-1: #d4ead4;
+  --heat-2: #9fd09f;
+  --heat-3: #5fb060;
+  --heat-4: #2e8b3a;
+  --heat-5: #1c5e26;
+  color-scheme: light;
+}
+
+html.dark {
+  /* Dark — graphite, not pure black; chrome highlights at 4-6% white. */
+  --paper-0: #0b0b0c;
+  --paper-1: #131315;
+  --paper-2: #1a1a1d;
+  --paper-3: #232328;
+  --ink-0: #ffffff;
+  --ink-1: #f1f1f0;
+  --ink-2: #c9c9c5;
+  --ink-3: #8a8a85;
+  --ink-4: #5d5d58;
+  --ink-5: #36363a;
+  --line: rgba(255, 255, 255, 0.06);
+  --accent: #d9ff5b; /* electric lime — high-contrast on graphite */
+  --accent-fg: #0b0b0c;
+  --accent-soft: rgba(217, 255, 91, 0.12);
+  --positive: #58e08a;
+  --warn: #ffb547;
+  --bad: #ff6660;
+  --grid: rgba(255, 255, 255, 0.045);
+  /* Dark-mode heat ramp ends on the lime accent so the heatmap reads as
+     part of the same colour story as the rest of the UI. */
+  --heat-0: #1a1a1d;
+  --heat-1: #2f3a1a;
+  --heat-2: #5a6e2a;
+  --heat-3: #93b53b;
+  --heat-4: #c4e44a;
+  --heat-5: #d9ff5b;
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--paper-0);
+  color: var(--ink-1);
+}
+
+body {
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular numerals for any number that benefits from column alignment. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Hairline divider that adapts to theme. */
+.hairline {
+  border-color: var(--line);
+}
+
+/* Focus ring — subtle accent halo, no hard double border. Uses a soft tint
+   that adapts to the theme without overpowering the input. */
+.focus-ring:focus-visible {
+  outline: none;
+  border-color: var(--accent) !important;
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    0 0 0 1px var(--accent) inset;
+}
+.focus-ring:focus-visible.no-inset {
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Native form-control reset so selects / option lists pick up our theme. */
+select.focus-ring,
+input.focus-ring,
+textarea.focus-ring {
+  background-clip: padding-box;
+}
+select option {
+  background: var(--paper-1);
+  color: var(--ink-1);
+}
+
+/* Custom scrollbar — subtle, dark/light aware. */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--paper-3);
+  border-radius: 999px;
+  border: 2px solid var(--paper-0);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--ink-5); }
+
+/* Recharts theming: kill the default white fills inside tooltips/legends.   */
+.recharts-default-tooltip { background: var(--paper-1) !important; border: 1px solid var(--line) !important; }
+.recharts-cartesian-grid line { stroke: var(--grid); }
+.recharts-text { fill: var(--ink-3); }
