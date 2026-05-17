@@ -78,6 +78,23 @@ body {
   font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* When installed as a PWA on iOS with viewport-fit=cover, the body extends
+     under the notch and home indicator. Add safe-area insets so chrome and
+     content don't get clipped. Web (browser tab) reports zero, so this is a
+     no-op outside standalone mode. */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Prevent iOS overscroll bounce from showing the home-screen wallpaper when
+   running in standalone mode. */
+@media (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
 }
 
 /* Tabular numerals for any number that benefits from column alignment. */
