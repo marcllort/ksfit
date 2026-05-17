@@ -159,7 +159,7 @@ export function Heatmap({ cells, unit = "min" }: Props) {
           ) : null}
         </span>
         <div className="flex items-center gap-2">
-          <span>Less</span>
+          <span className="tnum text-ink-3">0 {unit}</span>
           <div className="flex gap-[3px]">
             {([0, 1, 2, 3, 4, 5] as const).map((i) => (
               <div
@@ -169,7 +169,9 @@ export function Heatmap({ cells, unit = "min" }: Props) {
               />
             ))}
           </div>
-          <span>More</span>
+          <span className="tnum text-ink-3">
+            {max > 0 ? `${max} ${unit}` : `— ${unit}`}
+          </span>
         </div>
       </div>
     </div>

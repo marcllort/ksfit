@@ -50,11 +50,10 @@ export function Ring({
             cy={size / 2}
             r={r}
             fill="none"
-            stroke="var(--ink-4)"
-            strokeOpacity={0.35}
-            strokeWidth={stroke / 2}
-            strokeDasharray={c}
-            strokeDashoffset={c * (1 - Math.min(1, Math.max(0, secondary)))}
+            stroke="var(--ink-3)"
+            strokeOpacity={0.85}
+            strokeWidth={Math.max(3, stroke / 2)}
+            strokeDasharray={`${c * Math.min(1, Math.max(0, secondary))} ${c}`}
             strokeLinecap="round"
           />
         ) : null}
