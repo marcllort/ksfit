@@ -1,18 +1,11 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Activity,
-  CalendarDays,
-  Footprints,
-  LineChart,
-  LogOut,
-  Settings as SettingsIcon,
-} from "lucide-react";
+import { Activity, CalendarDays, Footprints, LineChart } from "lucide-react";
 import { ThemeToggle } from "./theme";
 import { LogoTile } from "./logo";
+import { UserMenu } from "./user-menu";
 import { cn } from "./ui";
-import { useRouter } from "next/navigation";
 
 interface Props {
   userName: string;
@@ -29,18 +22,12 @@ const nav = [
 
 export function Shell({ userName, userAvatar, children }: Props) {
   const path = usePathname();
-  const router = useRouter();
-  const logout = async () => {
-    await fetch("/api/logout", { method: "POST" });
-    router.push("/login");
-    router.refresh();
-  };
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-[1400px] flex-col px-4 sm:px-6 lg:px-8">
       <header className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8">
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between border-b border-line bg-paper-0/80 backdrop-blur-xl">
+          <div className="flex h-16 items-center justify-between gap-3 border-b border-line bg-paper-0/80 backdrop-blur-xl">
             <Link href="/" className="flex items-center gap-2">
               <LogoTile className="h-8 w-8 rounded-lg" />
               <span className="text-base font-semibold tracking-tight">Stride</span>
@@ -70,37 +57,7 @@ export function Shell({ userName, userAvatar, children }: Props) {
 
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <Link
-                href="/settings"
-                aria-label="Settings"
-                title="Settings"
-                className={cn(
-                  "focus-ring inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-paper-1 transition-colors hover:bg-paper-2 hover:text-ink-0",
-                  path.startsWith("/settings") ? "text-ink-0" : "text-ink-2",
-                )}
-              >
-                <SettingsIcon className="h-4 w-4" />
-              </Link>
-              <div className="hidden items-center gap-2 sm:flex">
-                <div className="h-8 w-8 overflow-hidden rounded-full border border-line bg-paper-2">
-                  {userAvatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={userAvatar} alt={userName} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="grid h-full w-full place-items-center text-xs text-ink-3">
-                      {userName.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={logout}
-                className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-paper-1 text-ink-2 transition-colors hover:bg-paper-2 hover:text-ink-0"
-                aria-label="Log out"
-                title="Log out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
+              <UserMenu userName={userName} userAvatar={userAvatar} />
             </div>
           </div>
         </div>
