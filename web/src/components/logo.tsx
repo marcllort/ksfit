@@ -1,9 +1,10 @@
 import { cn } from "./ui";
 
 /**
- * Stride brand mark — a stylized "S" formed from a single open curve, evoking
- * a walking path. Rendered with `currentColor` so it inherits from the
- * surrounding text colour (caller controls foreground via Tailwind classes).
+ * Stride brand mark — four ascending capsule bars, evoking an upward trend
+ * (steps, distance, fitness — all of which we want going up over time).
+ * Rendered with `currentColor` so it inherits from the surrounding text
+ * colour; the caller controls foreground via Tailwind classes.
  */
 export function LogoMark({ className }: { className?: string }) {
   return (
@@ -14,13 +15,17 @@ export function LogoMark({ className }: { className?: string }) {
       aria-hidden="true"
       className={className}
     >
-      <path
-        d="M22.5 10.5C22.5 7.6 19.7 6 16 6c-3.7 0-6.5 1.8-6.5 4.9 0 3.3 3.3 4.2 6.5 5.1 3.2.9 6.5 1.8 6.5 5.1 0 3.1-2.8 4.9-6.5 4.9-3.7 0-6.5-1.6-6.5-4.5"
+      <g
         stroke="currentColor"
-        strokeWidth="3.25"
+        strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
-      />
+      >
+        <line x1="6" y1="22" x2="6" y2="26" />
+        <line x1="13" y1="17" x2="13" y2="26" />
+        <line x1="19" y1="12" x2="19" y2="26" />
+        <line x1="26" y1="7" x2="26" y2="26" />
+      </g>
     </svg>
   );
 }
