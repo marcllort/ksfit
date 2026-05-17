@@ -138,6 +138,97 @@ export function sumStats(
   };
 }
 
+/** Empty bucket used when a day has no sessions but a downstream view still
+ *  wants a stable shape (KPIs of zero rather than undefined branches). */
+export function emptyBucket(date: string): DayBucket {
+  return {
+    date,
+    sessions: [],
+    durationSec: 0,
+    distanceM: 0,
+    steps: 0,
+    kcal: 0,
+  };
+}
+
+/** Convenience: get the bucket for `date` or a zeroed placeholder. */
+export function bucketFor(
+  buckets: Map<string, DayBucket>,
+  date: string,
+): DayBucket {
+  return buckets.get(date) ?? emptyBucket(date);
+}
+
+/** Mean steps across the last `n` days that actually had any steps logged.
+ *  Excludes zero-step days so a long stretch of inactivity doesn't dilute the
+ *  "what's typical for me when I move" benchmark used by the ring underlay. */
+export function avgActiveDailySteps(
+  sessions: NormalizedSession[],
+  n: number,
+  today: Date = new Date(),
+): number {
+  const days = lastNDays(sessions, n, today);
+  const active = days.filter((d) => d.steps > 0);
+  if (active.length === 0) return 0;
+  return Math.round(
+    active.reduce((a, d) => a + d.steps, 0) / active.length,
+  );
+}
+
+/** Mean steps on the same weekday as `date`, looking back `weeks` weeks
+ *  (default 8). Includes zero-step days so the average is an honest
+ *  "what does my typical Sunday look like" — rest days included.
+ *  The reference day itself is excluded. */
+export function sameWeekdayAvg(
+  buckets: Map<string, DayBucket>,
+  date: string,
+  weeks = 8,
+): number {
+  const d = new Date(date + "T00:00:00Z");
+  let total = 0;
+  let n = 0;
+  for (let i = 1; i <= weeks; i++) {
+    const k = dayKey(new Date(d.getTime() - i * 7 * 86_400_000));
+    const b = buckets.get(k);
+    total += b?.steps ?? 0;
+    n += 1;
+  }
+  return n > 0 ? Math.round(total / n) : 0;
+}
+
+/** Count of consecutive days, ending today, that hit `goal` steps.
+ *  Today is allowed to be "in progress" — if today hasn't met goal yet we
+ *  don't break the streak; we count back from yesterday instead. */
+export function currentStreak(
+  buckets: Map<string, DayBucket>,
+  goal: number,
+  today: Date = new Date(),
+): number {
+  if (goal <= 0) return 0;
+  const todayUtc = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+  );
+  let cursor = todayUtc;
+  let streak = 0;
+  // Special-case today: don't penalise a streak just because the day isn't
+  // over yet. If today met goal, include it; otherwise start from yesterday.
+  const todayBucket = buckets.get(dayKey(cursor));
+  if ((todayBucket?.steps ?? 0) >= goal) {
+    streak += 1;
+  }
+  cursor = new Date(cursor.getTime() - 86_400_000);
+  while (true) {
+    const b = buckets.get(dayKey(cursor));
+    if ((b?.steps ?? 0) >= goal) {
+      streak += 1;
+      cursor = new Date(cursor.getTime() - 86_400_000);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
 /** Returns an array of N day buckets ending today (inclusive), oldest first.
  *  Empty days are present with zeroed stats so heatmaps stay rectangular. */
 export function lastNDays(
