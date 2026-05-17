@@ -15,6 +15,7 @@ import { RefreshButton } from "@/components/refresh-button";
 import { Heatmap } from "@/components/charts/heatmap";
 import { BarTrend, AreaTrend } from "@/components/charts/trend";
 import { fetchAll } from "@/lib/fetchers";
+import { getSetting } from "@/lib/settings/server";
 import {
   dayKey,
   fmtDuration,
@@ -30,7 +31,6 @@ import {
 export const dynamic = "force-dynamic";
 
 const MS_DAY = 86_400_000;
-const STEPS_GOAL = 10_000;
 const DOW_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function startOfWeekUtc(d: Date): Date {
@@ -42,7 +42,10 @@ function startOfWeekUtc(d: Date): Date {
 }
 
 export default async function DashboardPage() {
-  const { user, sessions, weights } = await fetchAll();
+  const [{ user, sessions, weights }, STEPS_GOAL] = await Promise.all([
+    fetchAll(),
+    getSetting("stepsGoal"),
+  ]);
 
   const now = new Date();
   const todayKey = dayKey(now);

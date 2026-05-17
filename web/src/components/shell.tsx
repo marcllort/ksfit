@@ -1,7 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, CalendarDays, Footprints, LineChart, LogOut } from "lucide-react";
+import {
+  Activity,
+  CalendarDays,
+  Footprints,
+  LineChart,
+  LogOut,
+  Settings as SettingsIcon,
+} from "lucide-react";
 import { ThemeToggle } from "./theme";
 import { LogoTile } from "./logo";
 import { cn } from "./ui";
@@ -63,6 +70,17 @@ export function Shell({ userName, userAvatar, children }: Props) {
 
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              <Link
+                href="/settings"
+                aria-label="Settings"
+                title="Settings"
+                className={cn(
+                  "focus-ring inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-paper-1 transition-colors hover:bg-paper-2 hover:text-ink-0",
+                  path.startsWith("/settings") ? "text-ink-0" : "text-ink-2",
+                )}
+              >
+                <SettingsIcon className="h-4 w-4" />
+              </Link>
               <div className="hidden items-center gap-2 sm:flex">
                 <div className="h-8 w-8 overflow-hidden rounded-full border border-line bg-paper-2">
                   {userAvatar ? (
