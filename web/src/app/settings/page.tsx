@@ -1,17 +1,21 @@
 import { Shell } from "@/components/shell";
+import { Card, CardHeader } from "@/components/ui";
 import { SettingCard } from "@/components/settings/setting-card";
 import { fetchAll } from "@/lib/fetchers";
+import { fmtDate } from "@/lib/data";
 import { SETTINGS, type SettingId } from "@/lib/settings/definitions";
 import { getAllSettings } from "@/lib/settings/server";
+import { HardDrive } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const [{ user }, values] = await Promise.all([
+  const [{ user, devices }, values] = await Promise.all([
     fetchAll(),
     getAllSettings(),
   ]);
   const ids = Object.keys(SETTINGS) as SettingId[];
+  const boundDevices = devices?.list ?? [];
 
   return (
     <Shell userName={user.nickname || "Athlete"} userAvatar={user.avatar}>
@@ -34,6 +38,40 @@ export default async function SettingsPage() {
           <SettingCard key={id} id={id} saved={values[id]} />
         ))}
       </section>
+
+      {boundDevices.length > 0 ? (
+        <section className="mt-8">
+          <Card>
+            <CardHeader
+              title="Your devices"
+              hint={`${boundDevices.length} bound to your account`}
+            />
+            <div className="divide-y divide-line">
+              {boundDevices.map((d) => (
+                <div
+                  key={d.did}
+                  className="flex items-center gap-3 px-5 py-3.5"
+                >
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper-2 text-ink-3">
+                    <HardDrive className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium text-ink-1">
+                      {d.name || d.model}
+                    </div>
+                    <div className="truncate text-xs text-ink-3">
+                      {d.model}
+                      {d.bind_time
+                        ? ` · bound ${fmtDate(new Date(d.bind_time.replace(" ", "T") + "Z"), { dateStyle: "medium" })}`
+                        : ""}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </section>
+      ) : null}
     </Shell>
   );
 }

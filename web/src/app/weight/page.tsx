@@ -20,6 +20,30 @@ export default async function WeightPage() {
   const delta = latest && earliest ? latest.weight - earliest.weight : 0;
   const userHeightM = Number(user.height) / 100;
 
+  // Body-composition metrics from the most recent entry that actually has them
+  // (a basic scale leaves these as 0 — see normalizeWeights' -1 sentinel).
+  const lastWithComp = [...sorted].reverse().find(
+    (w) => w.fat || w.waterRate || w.bmr || w.muscleMass || w.visceralFat,
+  );
+  const bodyComp = lastWithComp
+    ? (
+        [
+          { label: "Body fat", value: lastWithComp.fat, unit: "%" },
+          { label: "Muscle", value: lastWithComp.muscleMass, unit: "kg" },
+          { label: "Water", value: lastWithComp.waterRate, unit: "%" },
+          { label: "BMR", value: lastWithComp.bmr, unit: "kcal" },
+          { label: "Visceral fat", value: lastWithComp.visceralFat, unit: "" },
+          { label: "Body age", value: lastWithComp.bodyAge, unit: "yr" },
+        ] as const
+      )
+        .filter((m) => m.value > 0)
+        .map((m) => ({
+          label: m.label,
+          unit: m.unit,
+          value: Number.isInteger(m.value) ? m.value : m.value.toFixed(1),
+        }))
+    : [];
+
   return (
     <Shell userName={user.nickname || ""} userAvatar={user.avatar}>
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -120,6 +144,32 @@ export default async function WeightPage() {
               />
             </div>
           </Card>
+
+          {bodyComp.length > 0 ? (
+            <Card className="mb-6">
+              <CardHeader
+                title="Body composition"
+                hint="Latest smart-scale reading"
+              />
+              <div className="grid grid-cols-2 gap-px overflow-hidden rounded-b-2xl bg-line sm:grid-cols-3 lg:grid-cols-5">
+                {bodyComp.map((m) => (
+                  <div key={m.label} className="bg-paper-1 p-4">
+                    <div className="text-xs uppercase tracking-[0.12em] text-ink-3">
+                      {m.label}
+                    </div>
+                    <div className="mt-1 flex items-baseline gap-1 tnum text-xl font-semibold text-ink-0">
+                      {m.value}
+                      {m.unit ? (
+                        <span className="text-xs font-normal text-ink-3">
+                          {m.unit}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ) : null}
 
           <Card>
             <CardHeader title="Entries" hint={`${weights.length} total`} />
