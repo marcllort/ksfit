@@ -15,6 +15,7 @@ import { fitbitRoutes } from "./routes/fitbit.ts";
 import { metricsRoutes } from "./routes/metrics.ts";
 import { coachRoutes } from "./routes/coach.ts";
 import { exerciseRoutes, profileRoutes } from "./routes/exercises.ts";
+import { openApiDocument } from "./openapi.ts";
 
 type Env = { Variables: { requestId: string } };
 
@@ -25,6 +26,9 @@ app.use("*", requestId);
 
 // Liveness probe — cheap, never touches upstreams.
 app.get("/healthz", (c) => c.json({ status: "ok" }));
+
+// OpenAPI spec — source for the web TS client + the iOS Swift client.
+app.get("/openapi.json", (c) => c.json(openApiDocument));
 
 // v1 routes. See docs/architecture/02-API-CONTRACT.md.
 app.route("/v1/auth", authRoutes);
