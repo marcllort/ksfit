@@ -4,6 +4,7 @@ import { AreaTrend } from "@/components/charts/trend";
 import { fetchAll } from "@/lib/fetchers";
 import { fmtDate, fmtDateTime } from "@stride/ksfit-client/data";
 import { ExportButton } from "@/components/export-button";
+import { WeightReminder } from "@/components/weight-reminder";
 import { TrendingDown, TrendingUp, Scale, Activity } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -59,6 +60,8 @@ export default async function WeightPage() {
           <ExportButton href="/api/export/weight.csv" label="Export CSV" />
         ) : null}
       </header>
+
+      <WeightReminder latestAtMs={latest ? latest.at.getTime() : null} />
 
       {weights.length === 0 ? (
         <Card>

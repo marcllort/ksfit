@@ -7,9 +7,16 @@ import {
   fitbitHeartRateForDay,
   fitbitSleep,
 } from "@/lib/health/fetchers";
+import { metricExercises } from "@/lib/health/metrics-fetchers";
 import { fitbitConfigured } from "@/lib/health/fitbit/tokens";
-import { Activity, HeartPulse, Moon, Footprints } from "lucide-react";
+import { Activity, HeartPulse, Moon, Footprints, Dumbbell, ChevronRight } from "lucide-react";
 import Link from "next/link";
+
+function fmtDuration(sec: number): string {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Fitbit · Stride" };
@@ -75,10 +82,11 @@ export default async function FitbitPage() {
   const days = recentDays(7, now);
   const todayKey = days[0]!;
 
-  const [hr, sleep, activity] = await Promise.all([
+  const [hr, sleep, activity, exercises] = await Promise.all([
     fitbitHeartRateForDay(todayKey, false),
     fitbitSleep(todayKey),
     fitbitDailyActivity(todayKey),
+    metricExercises(todayKey),
   ]);
 
   // A small week table for activity + sleep.
@@ -155,6 +163,35 @@ export default async function FitbitPage() {
                   {z.min}–{z.max} bpm
                 </div>
               </div>
+            ))}
+          </div>
+        </Card>
+      ) : null}
+
+      {exercises.length > 0 ? (
+        <Card className="mb-6">
+          <CardHeader
+            title="Exercises"
+            hint={`Detected today · ${todayKey}`}
+          />
+          <div className="divide-y divide-line">
+            {exercises.map((e) => (
+              <Link
+                key={e.id}
+                href={`/exercises/${e.id}`}
+                className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-paper-2"
+              >
+                <Dumbbell className="h-4 w-4 text-ink-4" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-ink-1">{e.type}</div>
+                  <div className="text-xs text-ink-4 tnum">
+                    {fmtDuration(e.durationSec)}
+                    {e.avgHr != null ? ` · ${e.avgHr} bpm avg` : ""}
+                    {e.source === "auto" ? " · auto" : ""}
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-ink-4" />
+              </Link>
             ))}
           </div>
         </Card>

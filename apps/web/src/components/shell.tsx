@@ -1,7 +1,16 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, CalendarDays, Footprints, HeartPulse, LineChart } from "lucide-react";
+import {
+  Activity,
+  CalendarDays,
+  Footprints,
+  HeartPulse,
+  LineChart,
+  ShieldCheck,
+  Flame,
+  Moon,
+} from "lucide-react";
 import { ThemeToggle } from "./theme";
 import { LogoTile } from "./logo";
 import { UserMenu } from "./user-menu";
@@ -15,6 +24,9 @@ interface Props {
 
 const nav = [
   { href: "/", label: "Overview", icon: Activity },
+  { href: "/recovery", label: "Recovery", icon: ShieldCheck },
+  { href: "/strain", label: "Strain", icon: Flame },
+  { href: "/sleep", label: "Sleep", icon: Moon },
   { href: "/sessions", label: "Sessions", icon: Footprints },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/weight", label: "Weight", icon: LineChart },
