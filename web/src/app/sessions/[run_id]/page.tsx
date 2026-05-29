@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Shell } from "@/components/shell";
 import { Card, CardHeader, Metric, Pill, Empty } from "@/components/ui";
+import { ExportButton } from "@/components/export-button";
 import { SessionChart } from "@/components/charts/session-chart";
 import { requireSession } from "@/lib/session";
 import { fetchRecordPoints, fetchSessions } from "@/lib/fetchers";
@@ -122,10 +123,18 @@ export default async function SessionDetailPage({
               <span className="tnum">{s.avgSpeedKmh.toFixed(2)} km/h avg</span>
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Pill tone="default">{s.model}</Pill>
-            {s.isAppleWatch ? <Pill tone="default">Apple Watch</Pill> : null}
-            {s.courseName ? <Pill tone="accent">{s.courseName}</Pill> : null}
+          <div className="flex flex-col items-end gap-3">
+            <div className="flex flex-wrap justify-end gap-2">
+              <Pill tone="default">{s.model}</Pill>
+              {s.isAppleWatch ? <Pill tone="default">Apple Watch</Pill> : null}
+              {s.courseName ? <Pill tone="accent">{s.courseName}</Pill> : null}
+            </div>
+            {points.length > 0 ? (
+              <ExportButton
+                href={`/api/export/points/${run_id}`}
+                label="Export telemetry"
+              />
+            ) : null}
           </div>
         </div>
       </header>

@@ -184,6 +184,23 @@ describe("normalizeWeights", () => {
     expect(out[0].weight).toBe(78.5);
     expect(out[0].at.toISOString()).toBe("2026-01-10T08:00:00.000Z");
   });
+
+  it("carries body-composition fields", () => {
+    const [w] = normalizeWeights([entry({ waterRate: "55", bmr: "1600", visceralFat: "6", muscleVolume: "55" })]);
+    expect(w).toMatchObject({ waterRate: 55, bmr: 1600, visceralFat: 6, muscleMass: 55 });
+  });
+
+  it("treats KS Fit -1 sentinels as absent (clamped to 0)", () => {
+    const [w] = normalizeWeights([
+      entry({ fat: "-1", waterRate: "-1", bmr: "-1", visceralFat: "-1", muscleVolume: "-1", bodyAge: "-1" }),
+    ]);
+    expect(w.fat).toBe(0);
+    expect(w.waterRate).toBe(0);
+    expect(w.bmr).toBe(0);
+    expect(w.visceralFat).toBe(0);
+    expect(w.muscleMass).toBe(0);
+    expect(w.bodyAge).toBe(0);
+  });
 });
 
 describe("UTC formatters", () => {

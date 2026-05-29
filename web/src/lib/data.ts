@@ -356,18 +356,33 @@ export interface NormalizedWeight {
   bmi: number;
   at: Date;
   fat: number;
+  /** Body-water percentage (0 when the scale didn't report it). */
+  waterRate: number;
+  /** Basal metabolic rate, kcal/day. */
+  bmr: number;
+  /** Visceral-fat index. */
+  visceralFat: number;
+  /** Muscle mass (kg). */
+  muscleMass: number;
   bodyAge: number;
 }
 
 export function normalizeWeights(entries: WeightEntry[]): NormalizedWeight[] {
+  // KS Fit uses -1 (and sometimes 0) as a "not measured" sentinel for the
+  // body-composition fields a basic scale can't read — treat those as absent.
+  const nonNeg = (v: unknown): number => Math.max(0, toNum(v));
   return entries
     .map((e) => ({
       id: e.id,
       weight: toNum(e.weight),
-      bmi: toNum(e.BMI),
+      bmi: nonNeg(e.BMI),
       at: new Date(e.add_time.replace(" ", "T") + "Z"),
-      fat: toNum(e.fat),
-      bodyAge: toNum(e.bodyAge),
+      fat: nonNeg(e.fat),
+      waterRate: nonNeg(e.waterRate),
+      bmr: nonNeg(e.bmr),
+      visceralFat: nonNeg(e.visceralFat),
+      muscleMass: nonNeg(e.muscleVolume),
+      bodyAge: nonNeg(e.bodyAge),
     }))
     .sort((a, b) => a.at.getTime() - b.at.getTime());
 }

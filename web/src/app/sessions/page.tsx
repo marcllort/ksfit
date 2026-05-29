@@ -1,5 +1,6 @@
 import { Shell } from "@/components/shell";
 import { Card } from "@/components/ui";
+import { ExportButton } from "@/components/export-button";
 import { SessionsClient } from "./client";
 import { fetchAll } from "@/lib/fetchers";
 import { fmtKm, fmtDuration, fmtKcal, fmtSteps } from "@/lib/data";
@@ -21,13 +22,16 @@ export default async function SessionsPage() {
 
   return (
     <Shell userName={user.nickname || ""} userAvatar={user.avatar}>
-      <header className="mb-6">
-        <p className="text-sm font-medium uppercase tracking-[0.14em] text-ink-3">
-          History
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink-0 sm:text-4xl">
-          All sessions
-        </h1>
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-[0.14em] text-ink-3">
+            History
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink-0 sm:text-4xl">
+            All sessions
+          </h1>
+        </div>
+        <ExportButton href="/api/export/sessions.csv" label="Export CSV" />
       </header>
 
       <Card className="mb-6">

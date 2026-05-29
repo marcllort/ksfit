@@ -3,6 +3,7 @@ import { Card, CardHeader, Metric, Empty, Pill } from "@/components/ui";
 import { AreaTrend } from "@/components/charts/trend";
 import { fetchAll } from "@/lib/fetchers";
 import { fmtDate, fmtDateTime } from "@/lib/data";
+import { ExportButton } from "@/components/export-button";
 import { TrendingDown, TrendingUp, Scale, Activity } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -21,13 +22,18 @@ export default async function WeightPage() {
 
   return (
     <Shell userName={user.nickname || ""} userAvatar={user.avatar}>
-      <header className="mb-6">
-        <p className="text-sm font-medium uppercase tracking-[0.14em] text-ink-3">
-          Body
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink-0 sm:text-4xl">
-          Weight & BMI
-        </h1>
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-[0.14em] text-ink-3">
+            Body
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink-0 sm:text-4xl">
+            Weight & BMI
+          </h1>
+        </div>
+        {weights.length > 0 ? (
+          <ExportButton href="/api/export/weight.csv" label="Export CSV" />
+        ) : null}
       </header>
 
       {weights.length === 0 ? (
