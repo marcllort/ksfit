@@ -12,10 +12,14 @@ import { ApiError, apiError } from "./lib/errors.ts";
 import { exportRoutes } from "./routes/export.ts";
 import { authRoutes } from "./routes/auth.ts";
 import { fitbitRoutes } from "./routes/fitbit.ts";
+import { metricsRoutes } from "./routes/metrics.ts";
+import { coachRoutes } from "./routes/coach.ts";
+import { exerciseRoutes, profileRoutes } from "./routes/exercises.ts";
 
 type Env = { Variables: { requestId: string } };
 
-const app = new Hono<Env>();
+// strict:false so "/v1/profile" and "/v1/profile/" both match (trailing slash).
+const app = new Hono<Env>({ strict: false });
 
 app.use("*", requestId);
 
@@ -26,6 +30,10 @@ app.get("/healthz", (c) => c.json({ status: "ok" }));
 app.route("/v1/auth", authRoutes);
 app.route("/v1/fitbit", fitbitRoutes);
 app.route("/v1/export", exportRoutes);
+app.route("/v1/metrics", metricsRoutes);
+app.route("/v1/exercises", exerciseRoutes);
+app.route("/v1/profile", profileRoutes);
+app.route("/v1/coach", coachRoutes);
 
 // Centralized error envelope.
 app.onError((err, c) => {
