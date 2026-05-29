@@ -46,10 +46,20 @@ function fmtSteps(n: number) {
   return n.toLocaleString();
 }
 
+type Tag = "all" | "watch" | "course";
+
 export function SessionsClient({ sessions }: { sessions: FlatSession[] }) {
   const [q, setQ] = useState("");
   const [range, setRange] = useState<RangeKey>("all");
   const [sort, setSort] = useState<SortKey>("date");
+  const [tag, setTag] = useState<Tag>("all");
+  const [model, setModel] = useState<string>("all");
+
+  // Distinct device models present in the data, for the device chips.
+  const models = useMemo(
+    () => Array.from(new Set(sessions.map((s) => s.model).filter(Boolean))).sort(),
+    [sessions],
+  );
 
   const filtered = useMemo(() => {
     const now = Date.now();
@@ -60,6 +70,9 @@ export function SessionsClient({ sessions }: { sessions: FlatSession[] }) {
     const needle = q.trim().toLowerCase();
     return sessions.filter((s) => {
       if (new Date(s.startTime).getTime() < cutoff) return false;
+      if (tag === "watch" && !s.isAppleWatch) return false;
+      if (tag === "course" && !s.courseName) return false;
+      if (model !== "all" && s.model !== model) return false;
       if (!needle) return true;
       const dateStr = new Date(s.startTime)
         .toLocaleString("en-US")
@@ -70,7 +83,7 @@ export function SessionsClient({ sessions }: { sessions: FlatSession[] }) {
         s.courseName.toLowerCase().includes(needle)
       );
     });
-  }, [sessions, q, range]);
+  }, [sessions, q, range, tag, model]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -151,6 +164,32 @@ export function SessionsClient({ sessions }: { sessions: FlatSession[] }) {
           </div>
         </div>
       </Card>
+
+      {/* Quick filters */}
+      {(models.length > 1 || sessions.some((s) => s.isAppleWatch || s.courseName)) ? (
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          <Chip active={tag === "all" && model === "all"} onClick={() => { setTag("all"); setModel("all"); }}>
+            All
+          </Chip>
+          {sessions.some((s) => s.isAppleWatch) ? (
+            <Chip active={tag === "watch"} onClick={() => setTag(tag === "watch" ? "all" : "watch")}>
+              Apple Watch
+            </Chip>
+          ) : null}
+          {sessions.some((s) => s.courseName) ? (
+            <Chip active={tag === "course"} onClick={() => setTag(tag === "course" ? "all" : "course")}>
+              Has course
+            </Chip>
+          ) : null}
+          {models.length > 1
+            ? models.map((m) => (
+                <Chip key={m} active={model === m} onClick={() => setModel(model === m ? "all" : m)}>
+                  {m}
+                </Chip>
+              ))
+            : null}
+        </div>
+      ) : null}
 
       <p className="mb-3 text-xs text-ink-3 tnum">
         {sorted.length.toLocaleString("en-US")} session{sorted.length === 1 ? "" : "s"}
@@ -291,5 +330,29 @@ function Stat({
         {label}
       </div>
     </div>
+  );
+}
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className={`focus-ring rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+        active
+          ? "border-transparent bg-ink-0 text-paper-0"
+          : "border-line bg-paper-1 text-ink-3 hover:text-ink-1"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

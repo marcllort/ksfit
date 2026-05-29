@@ -85,15 +85,17 @@ Add a `caddy:2-alpine` service, drop the app's `ports:` block, set `reverse_prox
 ---
 
 ## Batch 6 — Stretch / optional
-- **Courses view** — group sessions by `courseName`; lazily-fetched Plans page (`schedule.listMy`) on its own route (not `fetchAll`, to respect rate limits).
-- **Family view** — `share.getgrouplist` + `record.getShareRecord` (read-only).
-- **Notices/inbox** — header badge via `notice.hint`, drawer via `notice.getParentList/getChildList` (cache heavily).
-- **Leaderboard** — `ranking.getType` + `ranking.get`, paginated, on demand.
-- **Accessibility pass** — heatmap `role=grid` + aria-live; Recharts `role=img` + summary + visually-hidden table fallback.
-- **Sessions filtering/pagination** — quick-filter chips (Apple Watch / has-course / by device), numeric filters, windowed rendering for multi-year histories.
-- **Cache hardening** — in-flight promise dedupe (stampede guard), jittered backoff on `KSFitError` code 141 (rate-limit), document single-process/single-worker requirement.
-- **Client reconciliation** — TS handles `ret=402` token rotation; Python re-logs-in on 401/403. Only one matches reality; document the answer in both, consider a shared envelope/codes spec.
-- **PWA install affordance** — capture `beforeinstallprompt`; let cached session-detail render offline.
+- ✅ **Cache stampede guard** — in-flight promise dedupe in `lib/cache.ts` (+3 tests). *Done.*
+- ✅ **Sessions quick-filter chips** — Apple Watch / has-course / by-device in `sessions/client.tsx`. *Done.*
+- 🔜 **Courses view** — group sessions by `courseName`; lazily-fetched Plans page (`schedule.listMy`) on its own route (not `fetchAll`, to respect rate limits).
+- 🔜 **Family view** — `share.getgrouplist` + `record.getShareRecord` (read-only).
+- 🔜 **Notices/inbox** — header badge via `notice.hint`, drawer via `notice.getParentList/getChildList` (cache heavily).
+- 🔜 **Leaderboard** — `ranking.getType` + `ranking.get`, paginated, on demand.
+- 🔜 **Accessibility pass** — heatmap `role=grid` + aria-live; Recharts `role=img` + summary + visually-hidden table fallback.
+- 🔜 **Sessions pagination** — numeric filters, windowed rendering for multi-year histories.
+- 🔜 **Rate-limit backoff** — jittered backoff on `KSFitError` code 141; document single-process/single-worker requirement.
+- 🔜 **Client reconciliation** — TS handles `ret=402` token rotation; Python re-logs-in on 401/403. Only one matches reality; document the answer in both, consider a shared envelope/codes spec.
+- 🔜 **PWA install affordance** — capture `beforeinstallprompt`; let cached session-detail render offline.
 
 ---
 

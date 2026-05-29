@@ -15,6 +15,15 @@ type Entry = { at: number; data: unknown };
 const store = new Map<string, Entry>();
 
 /**
+ * In-flight request dedupe (stampede guard). When several renders miss the
+ * same key concurrently (e.g. a cold cache after a restart), they share one
+ * upstream call instead of each firing their own — important here because the
+ * KS Fit account rate-limits after a few requests. Keyed identically to the
+ * cache; the promise is removed as soon as it settles.
+ */
+const inflight = new Map<string, Promise<unknown>>();
+
+/**
  * Best-effort upper bound. KS Fit has ~30 endpoints we care about and
  * ksfit-web is single-user-per-session, so this cap is mostly a safety net
  * against pathological key cardinality.
@@ -49,9 +58,21 @@ export async function withCache<T>(
   if (process.env.KSFIT_TRACE) {
     console.log(`[cache] MISS ${key} (store.size=${store.size})`);
   }
-  const data = await fn();
-  set(key, data);
-  return data;
+  // Coalesce concurrent misses for the same key onto a single upstream call.
+  const existing = inflight.get(key);
+  if (existing) return existing as Promise<T>;
+
+  const p = (async () => {
+    const data = await fn();
+    set(key, data);
+    return data;
+  })();
+  inflight.set(key, p);
+  try {
+    return await p;
+  } finally {
+    inflight.delete(key);
+  }
 }
 
 /** Invalidate every cache entry whose key starts with `${prefix}`. */
