@@ -12,6 +12,7 @@ import {
   fmtKcal,
   fmtKm,
   fmtPace,
+  fmtTime,
 } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
@@ -72,13 +73,13 @@ export default async function DayPage({
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-ink-1 tnum">
-                      {s.startTime.toLocaleTimeString(undefined, {
+                      {fmtTime(s.startTime, {
                         hour: "numeric",
                         minute: "2-digit",
                       })}
                       <span className="ml-2 text-ink-3 font-normal">
                         —{" "}
-                        {s.endTime.toLocaleTimeString(undefined, {
+                        {fmtTime(s.endTime, {
                           hour: "numeric",
                           minute: "2-digit",
                         })}

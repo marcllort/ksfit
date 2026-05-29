@@ -1,5 +1,5 @@
 import { Shell } from "@/components/shell";
-import { Card, CardHeader, Pill } from "@/components/ui";
+import { Card } from "@/components/ui";
 import { SessionsClient } from "./client";
 import { fetchAll } from "@/lib/fetchers";
 import { fmtKm, fmtDuration, fmtKcal, fmtSteps } from "@/lib/data";

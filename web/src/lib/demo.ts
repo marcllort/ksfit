@@ -11,7 +11,7 @@ import type {
   UserInfo,
   WeightEntry,
 } from "./ksfit";
-import { normalizeAll, normalizeWeights } from "./data";
+import { CONSUME_SCALE, normalizeAll, normalizeWeights } from "./data";
 
 function mulberry32(seed: number) {
   let s = seed >>> 0;
@@ -75,7 +75,7 @@ function buildSessions(): SportRecord[] {
       const stepsPerKm = 1300 + Math.floor(rng() * 200);
       const steps = Math.round(km * stepsPerKm);
       const kcalKm = 55 + rng() * 12;
-      const kcal = Math.round(km * kcalKm * 1000); // consume is kcal × 1000
+      const kcal = Math.round(km * kcalKm * CONSUME_SCALE); // raw consume units
       const heart = 92 + Math.floor(rng() * 36);
       const hour = s === 0 ? 7 + Math.floor(rng() * 3) : 18 + Math.floor(rng() * 3);
       const minute = Math.floor(rng() * 60);

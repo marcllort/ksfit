@@ -9,7 +9,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     env_file:
-      - .env.local
+      # Credentials live in web/.env.local (the same file Next.js loads in dev).
+      # Path is relative to this compose file at the repo root.
+      - web/.env.local
     environment:
       - HOSTNAME=0.0.0.0
       - NODE_OPTIONS=--max-old-space-size=384

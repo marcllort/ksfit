@@ -2,6 +2,7 @@ import { Shell } from "@/components/shell";
 import { Card, CardHeader, Metric, Empty, Pill } from "@/components/ui";
 import { AreaTrend } from "@/components/charts/trend";
 import { fetchAll } from "@/lib/fetchers";
+import { fmtDate, fmtDateTime } from "@/lib/data";
 import { TrendingDown, TrendingUp, Scale, Activity } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -75,7 +76,7 @@ export default async function WeightPage() {
                     <TrendingUp className="h-4 w-4" />
                   )
                 }
-                sub={`since ${earliest.at.toLocaleDateString()}`}
+                sub={`since ${fmtDate(earliest.at, {})}`}
               />
             </Card>
             <Card className="p-0">
@@ -99,7 +100,7 @@ export default async function WeightPage() {
           <Card className="mb-6">
             <CardHeader
               title="Weight trend"
-              hint={`From ${earliest.at.toLocaleDateString()} to ${latest.at.toLocaleDateString()}`}
+              hint={`From ${fmtDate(earliest.at, {})} to ${fmtDate(latest.at, {})}`}
               action={<Pill tone="muted">kg</Pill>}
             />
             <div className="px-2 pb-3">
@@ -129,7 +130,7 @@ export default async function WeightPage() {
                     >
                       <div>
                         <div className="text-sm font-medium text-ink-1">
-                          {w.at.toLocaleString(undefined, {
+                          {fmtDateTime(w.at, {
                             weekday: "short",
                             year: "numeric",
                             month: "short",

@@ -8,6 +8,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Session } from "./ksfit";
+import { autoSession } from "./auto-login";
 
 const COOKIE = "ksfit_session";
 
@@ -42,6 +43,9 @@ export async function getSession(): Promise<Session | null> {
 
 export async function requireSession(): Promise<Session> {
   const s = await getSession();
-  if (!s) redirect("/login");
-  return s;
+  if (s) return s;
+  // Fall back to env-credential auto-login (single-user self-hosted installs).
+  const auto = await autoSession();
+  if (auto) return auto;
+  redirect("/login");
 }

@@ -6,8 +6,6 @@ import {
   Flame,
   Footprints,
   Gauge,
-  HeartPulse,
-  MapPin,
   Route,
   Timer,
 } from "lucide-react";
@@ -18,11 +16,14 @@ import { requireSession } from "@/lib/session";
 import { setSession } from "@/lib/session";
 import { fetchRecordPoints, fetchSessions } from "@/lib/fetchers";
 import {
+  fmtDate,
+  fmtDateTime,
   fmtDuration,
   fmtKcal,
   fmtKm,
   fmtPace,
   fmtSteps,
+  fmtTime,
   parsePointList,
   type SessionPoint,
 } from "@/lib/data";
@@ -104,7 +105,7 @@ export default async function SessionDetailPage({
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.14em] text-ink-3">
-              {s.startTime.toLocaleDateString(undefined, {
+              {fmtDate(s.startTime, {
                 weekday: "long",
                 month: "long",
                 day: "numeric",
@@ -115,7 +116,7 @@ export default async function SessionDetailPage({
               {fmtKm(s.distanceM)} <span className="text-2xl text-ink-3">km</span>
             </h1>
             <p className="mt-1 text-sm text-ink-3">
-              {s.startTime.toLocaleTimeString(undefined, {
+              {fmtTime(s.startTime, {
                 hour: "numeric",
                 minute: "2-digit",
               })}{" "}
@@ -190,11 +191,17 @@ export default async function SessionDetailPage({
           <dl className="grid grid-cols-2 gap-y-3 px-5 pb-5 text-sm">
             <dt className="text-ink-3">Start</dt>
             <dd className="tnum text-right text-ink-1">
-              {s.startTime.toLocaleString()}
+              {fmtDateTime(s.startTime, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
             </dd>
             <dt className="text-ink-3">End</dt>
             <dd className="tnum text-right text-ink-1">
-              {s.endTime.toLocaleString()}
+              {fmtDateTime(s.endTime, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
             </dd>
             <dt className="text-ink-3">Device</dt>
             <dd className="text-right text-ink-1">

@@ -157,7 +157,7 @@ export interface SportRecord {
   run_id: string;
   distance: string; // meters
   time: string; // seconds
-  consume: string; // kcal × 10
+  consume: string; // kcal × 1000 — divide by CONSUME_SCALE (see lib/data.ts)
   steps: string;
   model: string;
   start_time: string; // "YYYY-MM-DD HH:MM:SS"

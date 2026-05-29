@@ -82,7 +82,20 @@ npm run dev
 # then visit http://localhost:3000 and log in with your KS Fit credentials
 ```
 
-The web app does **not** read `KSFIT_EMAIL` / `KSFIT_PASSWORD` from `.env` — you log in via the in-app form and the resulting session token is stored in an `httpOnly` cookie. The Python `.env` is only used by the optional Python tooling.
+By default you log in via the in-app form and the resulting session token is stored in an `httpOnly` cookie.
+
+#### Single-user auto-login (optional)
+
+For a private, self-hosted install that only you use, you can skip the login form entirely: put your credentials in `web/.env.local` (gitignored) and the app logs in automatically on first request, caching the session in memory.
+
+```bash
+# web/.env.local
+KSFIT_EMAIL=you@example.com
+# Single-quote the password if it contains '#', '$', or spaces, or dotenv will mangle it.
+KSFIT_PASSWORD='your-password'
+```
+
+> **Only enable this on a host that's truly single-user and not reachable from the open internet.** In auto-login mode there is no login gate — anyone who can reach the app sees your data. Keep it bound to localhost / your LAN behind a reverse proxy (see [Docker](#docker) and `docs/ROADMAP.md`). Leave both vars unset to fall back to the normal in-app login. Setting `KSFIT_DEMO=1` bypasses auto-login.
 
 ### Try it without an account
 

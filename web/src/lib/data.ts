@@ -2,10 +2,21 @@
  * Domain transforms layered on top of the raw KS Fit responses.
  *
  * KS Fit returns numbers as strings; distance in metres; time in seconds; and
- * `consume` is kilocalories × 10 (legacy). All conversion happens here so UI
- * code is unit-free.
+ * `consume` is kilocalories × 1000 (the cloud preserves three decimals). All
+ * conversion happens here so UI code is unit-free. See CONSUME_SCALE below.
  */
 import type { SportRecord, WeightEntry } from "./ksfit";
+
+/**
+ * Divisor that turns the raw `consume` field into kilocalories.
+ *
+ * The cloud stores kcal × 1000 (three decimals of precision). This was
+ * verified empirically: per-second point-list cumulative-kcal values match
+ * `record.consume / 1000` exactly for the same session. Older docs/comments
+ * claimed × 10 — that is incorrect; this constant is the single source of
+ * truth, mirrored in demo.ts.
+ */
+export const CONSUME_SCALE = 1000;
 
 export interface NormalizedSession {
   runId: string;
@@ -38,10 +49,7 @@ export function normalizeSession(r: SportRecord): NormalizedSession {
   const startTime = new Date(r.start_time.replace(" ", "T") + "Z");
   const durationSec = toNum(r.time);
   const distanceM = toNum(r.distance);
-  // `consume` is kilocalories ×1000 (the cloud preserves three decimals).
-  // Confirmed against per-second point-list cumulative-kcal values that match
-  // record.consume / 1000 exactly for the same session.
-  const kcal = toNum(r.consume) / 1000;
+  const kcal = toNum(r.consume) / CONSUME_SCALE;
   const steps = toNum(r.steps);
   const heartAvg = toNum(r.heart);
   const avgSpeedKmh =
@@ -263,6 +271,41 @@ export function lastNDays(
 }
 
 /* ----------------- formatters ------------------------------------------- */
+
+/**
+ * Timezone-stable date/time formatting for session & weight timestamps.
+ *
+ * Session `start_time` is a wall-clock string that we parse as UTC-naive (see
+ * normalizeSession — we append "Z"). The whole app buckets those instants in
+ * UTC (dayKey, groupByDay, the day panel). Therefore every place that renders
+ * one of these Dates MUST also format in UTC, or a session can display under a
+ * different day/time than the bucket it was grouped into. Always format these
+ * timestamps via these helpers (never a bare toLocale*), so the convention
+ * stays in exactly one place.
+ */
+export function fmtDateTime(
+  d: Date,
+  options: Intl.DateTimeFormatOptions,
+  locale?: string,
+): string {
+  return d.toLocaleString(locale, { ...options, timeZone: "UTC" });
+}
+
+export function fmtDate(
+  d: Date,
+  options: Intl.DateTimeFormatOptions,
+  locale?: string,
+): string {
+  return d.toLocaleDateString(locale, { ...options, timeZone: "UTC" });
+}
+
+export function fmtTime(
+  d: Date,
+  options: Intl.DateTimeFormatOptions,
+  locale?: string,
+): string {
+  return d.toLocaleTimeString(locale, { ...options, timeZone: "UTC" });
+}
 
 export function fmtKm(m: number, digits = 2): string {
   return (m / 1000).toFixed(digits);

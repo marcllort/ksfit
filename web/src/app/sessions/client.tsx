@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ArrowRight, Footprints, Search, SlidersHorizontal } from "lucide-react";
 import { Card, Pill } from "@/components/ui";
 import { Dropdown } from "@/components/dropdown";
+import { fmtDate, fmtDateTime, fmtTime } from "@/lib/data";
 
 export interface FlatSession {
   runId: string;
@@ -178,12 +179,12 @@ export function SessionsClient({ sessions }: { sessions: FlatSession[] }) {
                     href={`/day/${day}`}
                     className="text-sm font-semibold tracking-tight text-ink-0 hover:underline"
                   >
-                    {new Date(day + "T00:00:00Z").toLocaleDateString("en-US", {
+                    {fmtDate(new Date(day + "T00:00:00Z"), {
                       weekday: "long",
                       month: "long",
                       day: "numeric",
                       year: "numeric",
-                    })}
+                    }, "en-US")}
                   </Link>
                   <span className="text-xs text-ink-3 tnum">
                     {items.length}× · <span className="text-accent">{fmtSteps(totals.steps)} steps</span>{" "}
@@ -227,14 +228,14 @@ function SessionRow({ s, showDate }: { s: FlatSession; showDate?: boolean }) {
       <div className="min-w-0">
         <div className="truncate text-sm font-semibold text-ink-1">
           {showDate
-            ? dt.toLocaleString(undefined, {
+            ? fmtDateTime(dt, {
                 weekday: "short",
                 month: "short",
                 day: "numeric",
                 hour: "numeric",
                 minute: "2-digit",
               })
-            : dt.toLocaleTimeString(undefined, {
+            : fmtTime(dt, {
                 hour: "numeric",
                 minute: "2-digit",
               })}

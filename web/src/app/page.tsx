@@ -17,6 +17,7 @@ import { getSetting } from "@/lib/settings/server";
 import {
   currentStreak,
   dayKey,
+  fmtDateTime,
   fmtDurationCompact,
   fmtKcal,
   fmtKm,
@@ -232,13 +233,13 @@ export default async function DashboardPage() {
                     </div>
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium text-ink-1">
-                        {s.startTime.toLocaleString("en-US", {
+                        {fmtDateTime(s.startTime, {
                           weekday: "short",
                           month: "short",
                           day: "numeric",
                           hour: "numeric",
                           minute: "2-digit",
-                        })}
+                        }, "en-US")}
                       </div>
                       <div className="truncate text-xs text-ink-3 tnum">
                         {s.model}

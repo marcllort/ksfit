@@ -1,5 +1,5 @@
 import { Shell } from "@/components/shell";
-import { Card, CardHeader, Pill, Empty } from "@/components/ui";
+import { Card, Empty } from "@/components/ui";
 import { CalendarClient } from "./client";
 import { fetchAll } from "@/lib/fetchers";
 import { groupByDay } from "@/lib/data";

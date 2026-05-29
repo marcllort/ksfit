@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Card, CardHeader, Pill } from "@/components/ui";
+import { Card, Pill } from "@/components/ui";
+import { fmtDate } from "@/lib/data";
 
 export interface DayDatum {
   date: string;
@@ -13,10 +14,6 @@ export interface DayDatum {
 }
 
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-function ym(d: Date) {
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
-}
 
 export function CalendarClient({
   days,
@@ -99,7 +96,7 @@ export function CalendarClient({
             <ChevronLeft className="h-4 w-4" />
           </button>
           <h2 className="text-xl font-semibold tracking-tight text-ink-0">
-            {monthStart.toLocaleDateString(undefined, {
+            {fmtDate(monthStart, {
               month: "long",
               year: "numeric",
             })}

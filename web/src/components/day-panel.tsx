@@ -13,7 +13,6 @@ import {
   ArrowRight,
   CalendarDays,
   Flame,
-  Footprints,
   Gauge,
   Route,
   Timer,
@@ -211,7 +210,6 @@ export function DayPanel({ date, sessions, stepsGoal, now }: Props) {
           <CompareLine
             steps={target.steps}
             stepsGoal={stepsGoal}
-            sameDowAvg={sameDowAvg}
             wkDeltaPct={wkDeltaPct}
             weekdayLong={weekdayLong}
             avgPaceForEta={avgPaceForEta}
@@ -367,7 +365,6 @@ function Kpi({
 function CompareLine({
   steps,
   stepsGoal,
-  sameDowAvg,
   wkDeltaPct,
   weekdayLong,
   avgPaceForEta,
@@ -375,7 +372,6 @@ function CompareLine({
 }: {
   steps: number;
   stepsGoal: number;
-  sameDowAvg: number;
   wkDeltaPct: number | null;
   weekdayLong: string;
   avgPaceForEta: number;

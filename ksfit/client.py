@@ -171,7 +171,7 @@ class KSFitClient:
         Pass `since_timestamp` (server epoch from a previous response) to fetch
         only deltas. Returns `{"record": [SessionRecord], "timestamp": int}`.
         Each SessionRecord has detailid, did (MAC), run_id, distance (m),
-        time (s), steps, consume (kcal × 10), heart, model, start_time,
+        time (s), steps, consume (kcal × 1000), heart, model, start_time,
         course_id, iw_* (Apple Watch fields), …
         """
         return self.call("record.GetAllRecords", timestamp=since_timestamp)

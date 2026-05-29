@@ -8,6 +8,11 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
   if (process.env.KSFIT_DEMO === "1") return NextResponse.next();
+  // Single-user self-hosted install: env credentials drive an auto-login in the
+  // data layer, so there's no cookie to gate on — let every request through.
+  if (process.env.KSFIT_EMAIL && process.env.KSFIT_PASSWORD) {
+    return NextResponse.next();
+  }
   const session = req.cookies.get("ksfit_session")?.value;
   if (!session) {
     const url = req.nextUrl.clone();
