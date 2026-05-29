@@ -19,7 +19,7 @@ import {
   type SleepSummary,
   type WeightReading,
   NotConnectedError,
-} from "../types";
+} from "@stride/health-core";
 import { getFreshTokens, refreshTokens, getTokens, type FitbitTokens } from "./tokens";
 
 const API = "https://api.fitbit.com";

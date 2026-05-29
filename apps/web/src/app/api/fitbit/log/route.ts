@@ -4,7 +4,7 @@ import { fetchSessions } from "@/lib/fetchers";
 import { fitbitProvider, FitbitRateLimitError } from "@/lib/health/fitbit/provider";
 import { fitbitConfigured } from "@/lib/health/fitbit/tokens";
 import { loggedSet, rememberLogged } from "@/lib/health/fitbit/logged";
-import { NotConnectedError } from "@/lib/health/types";
+import { NotConnectedError } from "@stride/health-core";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

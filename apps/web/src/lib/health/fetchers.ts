@@ -14,7 +14,7 @@ import type {
   DayHeartRate,
   SleepSummary,
   WeightReading,
-} from "./types";
+} from "@stride/health-core";
 
 const TTL = {
   hr: 10 * 60_000,
