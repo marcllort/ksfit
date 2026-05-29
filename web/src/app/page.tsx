@@ -7,7 +7,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Shell } from "@/components/shell";
-import { Card, CardHeader, Pill, Empty } from "@/components/ui";
+import { Card, CardHeader, Pill, Empty, cn } from "@/components/ui";
 import { RefreshButton } from "@/components/refresh-button";
 import { Heatmap } from "@/components/charts/heatmap";
 import { BarTrend, AreaTrend } from "@/components/charts/trend";
@@ -82,6 +82,45 @@ export default async function DashboardPage() {
     label: d.date.slice(5),
     value: Number((d.distanceM / 1000).toFixed(2)),
   }));
+
+  // This week vs last week (Mon-anchored, UTC).
+  const thisWeek = sumStats(sessions, weekStart);
+  const lastWeekStart = new Date(weekStart.getTime() - 7 * MS_DAY);
+  const lastWeek = sumStats(sessions, lastWeekStart, weekStart);
+  const pctDelta = (cur: number, prev: number): number | null =>
+    prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null;
+  const weekDeltas = {
+    distance: pctDelta(thisWeek.distanceM, lastWeek.distanceM),
+    duration: pctDelta(thisWeek.durationSec, lastWeek.durationSec),
+    steps: pctDelta(thisWeek.steps, lastWeek.steps),
+  };
+
+  // Personal bests across all history.
+  const longestSession = sessions.reduce(
+    (m, s) => (s.distanceM > m ? s.distanceM : m),
+    0,
+  );
+  const dayBuckets = [...buckets.values()];
+  const bestDayM = dayBuckets.reduce(
+    (m, b) => (b.distanceM > m ? b.distanceM : m),
+    0,
+  );
+  // Longest streak ever: scan day keys for the longest run hitting the goal.
+  let longestStreak = 0;
+  if (STEPS_GOAL > 0 && dayBuckets.length > 0) {
+    const goalDays = dayBuckets
+      .filter((b) => b.steps >= STEPS_GOAL)
+      .map((b) => b.date)
+      .sort();
+    let run = 0;
+    let prev: number | null = null;
+    for (const d of goalDays) {
+      const t = new Date(d + "T00:00:00Z").getTime();
+      run = prev !== null && t - prev === MS_DAY ? run + 1 : 1;
+      if (run > longestStreak) longestStreak = run;
+      prev = t;
+    }
+  }
 
   const recent = sessions.slice(0, 6);
   const latestWeight = weights[weights.length - 1];
@@ -169,6 +208,46 @@ export default async function DashboardPage() {
           />
           <div className="px-2 pb-3">
             <BarTrend data={weekBars} height={180} unit="km" />
+          </div>
+        </Card>
+      </section>
+
+      {/* This week + personal bests */}
+      <section className="mb-6 grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader title="This week" hint="vs last week · Mon–Sun" />
+          <div className="grid grid-cols-3 gap-px overflow-hidden bg-line">
+            <WeekStat
+              label="Distance"
+              value={`${fmtKm(thisWeek.distanceM, 1)} km`}
+              delta={weekDeltas.distance}
+            />
+            <WeekStat
+              label="Time"
+              value={fmtDurationCompact(thisWeek.durationSec)}
+              delta={weekDeltas.duration}
+            />
+            <WeekStat
+              label="Steps"
+              value={fmtSteps(thisWeek.steps)}
+              delta={weekDeltas.steps}
+            />
+          </div>
+          <div className="px-5 py-3 text-xs text-ink-3 tnum">
+            {thisWeek.activeDays} active day
+            {thisWeek.activeDays === 1 ? "" : "s"} · {fmtKcal(thisWeek.kcal)} kcal
+          </div>
+        </Card>
+
+        <Card>
+          <CardHeader title="Personal bests" hint="All-time records" />
+          <div className="grid grid-cols-3 gap-px overflow-hidden bg-line">
+            <WeekStat label="Longest run" value={`${fmtKm(longestSession, 2)} km`} />
+            <WeekStat label="Best day" value={`${fmtKm(bestDayM, 2)} km`} />
+            <WeekStat
+              label="Longest streak"
+              value={`${longestStreak} day${longestStreak === 1 ? "" : "s"}`}
+            />
           </div>
         </Card>
       </section>
@@ -342,4 +421,42 @@ function greet(d: Date): string {
   if (h < 12) return "Good morning";
   if (h < 18) return "Good afternoon";
   return "Good evening";
+}
+
+/** A single stat tile with an optional week-over-week delta chip. */
+function WeekStat({
+  label,
+  value,
+  delta,
+}: {
+  label: string;
+  value: string;
+  delta?: number | null;
+}) {
+  const showDelta = delta !== undefined && delta !== null;
+  const up = (delta ?? 0) >= 0;
+  return (
+    <div className="bg-paper-1 p-4">
+      <div className="text-xs uppercase tracking-[0.12em] text-ink-3">{label}</div>
+      <div className="mt-1 tnum text-lg font-semibold text-ink-0">{value}</div>
+      {showDelta ? (
+        <div
+          className={cn(
+            "mt-1 inline-flex items-center gap-0.5 text-xs font-medium tnum",
+            up
+              ? "text-[color:var(--positive)]"
+              : "text-ink-3",
+          )}
+        >
+          {up ? (
+            <TrendingUp className="h-3 w-3" />
+          ) : (
+            <TrendingDown className="h-3 w-3" />
+          )}
+          {up ? "+" : ""}
+          {delta}%
+        </div>
+      ) : null}
+    </div>
+  );
 }

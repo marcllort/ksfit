@@ -89,6 +89,19 @@ export default async function SessionDetailPage({
         )
       : 0;
 
+  // Moving time: sum the gaps between samples where speed was non-zero. Lets us
+  // show "moving" vs total when a session has paused stretches (speed = 0).
+  let movingSec = 0;
+  for (let i = 1; i < points.length; i++) {
+    if (points[i].speedKmh > 0.1) movingSec += points[i].t - points[i - 1].t;
+  }
+  const hasPauses = movingSec > 0 && movingSec < s.durationSec - 5;
+
+  // Fastest km from the per-km splits.
+  const fastestKm = splits.length
+    ? splits.reduce((m, sp) => (sp.pace < m.pace ? sp : m), splits[0])
+    : null;
+
   return (
     <Shell userName={user.nickname || ""} userAvatar={user.avatar}>
       <Link
@@ -182,6 +195,18 @@ export default async function SessionDetailPage({
         <CardHeader
           title="Splits"
           hint={`Per-kilometre breakdown · ${splits.length} full split${splits.length === 1 ? "" : "s"}`}
+          action={
+            <div className="flex flex-wrap justify-end gap-2">
+              {hasPauses ? (
+                <Pill tone="muted">{fmtDuration(movingSec)} moving</Pill>
+              ) : null}
+              {fastestKm ? (
+                <Pill tone="good">
+                  fastest km {fmtPace(fastestKm.pace)} (#{fastestKm.km})
+                </Pill>
+              ) : null}
+            </div>
+          }
         />
         {splits.length === 0 ? (
           <div className="p-5"><Empty>Not enough distance for a split.</Empty></div>

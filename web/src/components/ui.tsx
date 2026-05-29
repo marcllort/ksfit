@@ -151,6 +151,15 @@ export function Button({
   );
 }
 
+export function Skeleton({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn("animate-pulse rounded-lg bg-paper-2", className)}
+      aria-hidden="true"
+    />
+  );
+}
+
 export function Empty({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-paper-1/50 p-10 text-center text-sm text-ink-3">
