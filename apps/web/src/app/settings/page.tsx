@@ -4,7 +4,7 @@ import { Card, CardHeader } from "@/components/ui";
 import { SettingCard } from "@/components/settings/setting-card";
 import { FitbitConnectCard } from "@/components/fitbit/connect-card";
 import { fetchAll } from "@/lib/fetchers";
-import { fmtDate } from "@/lib/data";
+import { fmtDate } from "@stride/ksfit-client/data";
 import { SETTINGS, type SettingId } from "@/lib/settings/definitions";
 import { getAllSettings } from "@/lib/settings/server";
 import { fitbitConfigured } from "@/lib/health/fitbit/tokens";

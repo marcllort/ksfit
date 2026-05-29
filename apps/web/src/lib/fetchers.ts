@@ -2,20 +2,17 @@
  * Server-side fetchers that combine a Session with the typed `ksfit` calls and
  * normalize the payload. Pages call these once per request.
  */
-import { ksfit, type SportRecord, type Session } from "./ksfit";
+import { ksfit, type SportRecord, type Session } from "@stride/ksfit-client";
 import { ensureRotationPersist, requireSession } from "./session";
 import { withCache } from "./cache";
 import {
   normalizeAll,
   normalizeWeights,
-  type NormalizedSession,
-  type NormalizedWeight,
-} from "./data";
-import {
   getDemoData,
   getDemoRecordPoints,
   getDemoSessions,
-} from "./demo";
+  type DashboardData,
+} from "@stride/ksfit-client";
 
 const DEMO = process.env.KSFIT_DEMO === "1";
 
@@ -58,13 +55,6 @@ export async function fetchSessions(session: Session) {
   const records: SportRecord[] =
     (sport as { record?: SportRecord[] })?.record ?? [];
   return { user, sessions: normalizeAll(records) };
-}
-
-export interface DashboardData {
-  user: Awaited<ReturnType<typeof ksfit.userInfo>>;
-  sessions: NormalizedSession[];
-  weights: NormalizedWeight[];
-  devices: Awaited<ReturnType<typeof ksfit.devices>>;
 }
 
 export async function fetchAll(): Promise<DashboardData> {

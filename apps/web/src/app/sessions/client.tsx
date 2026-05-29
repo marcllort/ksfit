@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { ArrowRight, Footprints, Search, SlidersHorizontal } from "lucide-react";
 import { Card, Pill } from "@/components/ui";
 import { Dropdown } from "@/components/dropdown";
-import { fmtDate, fmtDateTime, fmtTime } from "@/lib/data";
+import { fmtDate, fmtDateTime, fmtTime } from "@stride/ksfit-client/data";
 
 export interface FlatSession {
   runId: string;

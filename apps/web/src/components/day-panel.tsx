@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { Card, Pill } from "@/components/ui";
 import { Ring } from "@/components/ring";
-import type { NormalizedSession } from "@/lib/data";
+import type { NormalizedSession } from "@stride/ksfit-client/data";
 import {
   bucketFor,
   dayKey,
@@ -32,7 +32,7 @@ import {
   fmtSteps,
   groupByDay,
   sameWeekdayAvg,
-} from "@/lib/data";
+} from "@stride/ksfit-client/data";
 
 const MS_DAY = 86_400_000;
 const DOW_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { login, KSFitError } from "@/lib/ksfit";
+import { login, KSFitError } from "@stride/ksfit-client";
 import { setSession } from "@/lib/session";
 
 export const runtime = "nodejs";

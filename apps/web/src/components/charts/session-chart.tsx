@@ -9,7 +9,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-import type { SessionPoint } from "@/lib/data";
+import type { SessionPoint } from "@stride/ksfit-client/data";
 
 interface Props {
   points: SessionPoint[];

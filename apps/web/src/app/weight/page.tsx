@@ -2,7 +2,7 @@ import { Shell } from "@/components/shell";
 import { Card, CardHeader, Metric, Empty, Pill } from "@/components/ui";
 import { AreaTrend } from "@/components/charts/trend";
 import { fetchAll } from "@/lib/fetchers";
-import { fmtDate, fmtDateTime } from "@/lib/data";
+import { fmtDate, fmtDateTime } from "@stride/ksfit-client/data";
 import { ExportButton } from "@/components/export-button";
 import { TrendingDown, TrendingUp, Scale, Activity } from "lucide-react";
 

@@ -5,7 +5,12 @@
  * `consume` is kilocalories × 1000 (the cloud preserves three decimals). All
  * conversion happens here so UI code is unit-free. See CONSUME_SCALE below.
  */
-import type { SportRecord, WeightEntry } from "./ksfit";
+import type {
+  Device,
+  SportRecord,
+  UserInfo,
+  WeightEntry,
+} from "./ksfit";
 
 /**
  * Divisor that turns the raw `consume` field into kilocalories.
@@ -35,6 +40,18 @@ export interface NormalizedSession {
   courseName: string;
   isAppleWatch: boolean;
   raw: SportRecord;
+}
+
+/**
+ * The composed payload a dashboard render needs. Defined here (the domain
+ * layer) rather than in the server fetchers so the demo dataset and the
+ * fetchers can share it without a server→domain dependency cycle.
+ */
+export interface DashboardData {
+  user: UserInfo;
+  sessions: NormalizedSession[];
+  weights: NormalizedWeight[];
+  devices: { list: Device[]; share_list?: Device[] };
 }
 
 const toNum = (v: unknown, dflt = 0): number => {

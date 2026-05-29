@@ -4,14 +4,18 @@
  *
  * Everything here is deterministic (seeded PRNG) so screenshots are stable.
  */
-import type { DashboardData } from "./fetchers";
 import type {
   Device,
   SportRecord,
   UserInfo,
   WeightEntry,
 } from "./ksfit";
-import { CONSUME_SCALE, normalizeAll, normalizeWeights } from "./data";
+import {
+  CONSUME_SCALE,
+  normalizeAll,
+  normalizeWeights,
+  type DashboardData,
+} from "./data";
 
 function mulberry32(seed: number) {
   let s = seed >>> 0;

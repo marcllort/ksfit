@@ -1,7 +1,7 @@
 import { requireSession } from "@/lib/session";
 import { fetchRecordPoints } from "@/lib/fetchers";
-import { parsePointList, CONSUME_SCALE } from "@/lib/data";
-import { toCsv, csvResponse } from "@/lib/csv";
+import { parsePointList, CONSUME_SCALE } from "@stride/ksfit-client/data";
+import { toCsv, csvResponse } from "@stride/ksfit-client/csv";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

@@ -3,7 +3,7 @@ import { Card } from "@/components/ui";
 import { ExportButton } from "@/components/export-button";
 import { SessionsClient } from "./client";
 import { fetchAll } from "@/lib/fetchers";
-import { fmtKm, fmtDuration, fmtKcal, fmtSteps } from "@/lib/data";
+import { fmtKm, fmtDuration, fmtKcal, fmtSteps } from "@stride/ksfit-client/data";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Sessions · Stride" };

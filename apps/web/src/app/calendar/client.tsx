@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, Pill } from "@/components/ui";
-import { fmtDate } from "@/lib/data";
+import { fmtDate } from "@stride/ksfit-client/data";
 
 export interface DayDatum {
   date: string;

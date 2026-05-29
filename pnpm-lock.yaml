@@ -14,6 +14,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@stride/ksfit-client':
+        specifier: workspace:*
+        version: link:../../packages/ksfit-client
       date-fns:
         specifier: ^4.1.0
         version: 4.3.0
@@ -66,6 +69,18 @@ importers:
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.19
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.7
+        version: 4.1.7(@types/node@22.19.19)(vite@8.0.14(@types/node@22.19.19)(jiti@1.21.7))
+
+  packages/ksfit-client:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.5
+        version: 22.19.19
       typescript:
         specifier: ^5.7.3
         version: 5.9.3

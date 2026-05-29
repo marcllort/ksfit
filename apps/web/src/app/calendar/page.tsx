@@ -2,7 +2,7 @@ import { Shell } from "@/components/shell";
 import { Card, Empty } from "@/components/ui";
 import { CalendarClient } from "./client";
 import { fetchAll } from "@/lib/fetchers";
-import { groupByDay } from "@/lib/data";
+import { groupByDay } from "@stride/ksfit-client/data";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Calendar · Stride" };

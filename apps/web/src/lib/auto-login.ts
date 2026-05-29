@@ -9,7 +9,7 @@
  * This is intended for a private deployment that only you use. Do NOT enable
  * it on any shared/multi-user host: every visitor would see your data.
  */
-import { login, type Session } from "./ksfit";
+import { login, type Session } from "@stride/ksfit-client";
 
 const EMAIL = process.env.KSFIT_EMAIL?.trim();
 const PASSWORD = process.env.KSFIT_PASSWORD;

@@ -7,7 +7,7 @@
  */
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { Session } from "./ksfit";
+import type { Session } from "@stride/ksfit-client";
 import { autoSession } from "./auto-login";
 
 const COOKIE = "ksfit_session";

@@ -26,7 +26,7 @@ import {
   groupByDay,
   lastNDays,
   sumStats,
-} from "@/lib/data";
+} from "@stride/ksfit-client/data";
 
 export const dynamic = "force-dynamic";
 
