@@ -1,34 +1,45 @@
 services:
-  ksfit:
-    image: ksfit:latest
-    container_name: ksfit
+  stride:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: stride:latest
+    container_name: stride
     restart: unless-stopped
     ports:
-      # Bound to localhost — front this with Caddy on the host.
-      - "127.0.0.1:3005:3000"
+      # Loopback only — front this with Caddy (host or the proxy profile below).
+      # 3000 = web, 3001 = backend API. Caddy splits / and /api.
+      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3001:3001"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     env_file:
-      # Credentials live in web/.env.local (the same file Next.js loads in dev).
-      # Path is relative to this compose file at the repo root.
-      - web/.env.local
+      # KS Fit creds (+ optional FITBIT_* / GOOGLE_HEALTH_* / ANTHROPIC_API_KEY).
+      - apps/web/.env.local
     environment:
       - HOSTNAME=0.0.0.0
       - NODE_OPTIONS=--max-old-space-size=384
+      - STRIDE_BACKEND_URL=http://127.0.0.1:3001
+      - STRIDE_DB_PATH=/data/stride.db
+      # 32-byte AES key for encrypting provider tokens at rest. REQUIRED in prod.
+      # Generate once: openssl rand -hex 32  → put in web/.env.local as TOKEN_ENC_KEY.
+      - TOKEN_ENC_KEY=${TOKEN_ENC_KEY:-}
+    volumes:
+      - stride_data:/data
     deploy:
       resources:
         limits:
-          memory: 512M
-          cpus: "1.0"
+          memory: 768M
+          cpus: "1.5"
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      # Hits the local /api/health route (no KS Fit traffic, no lockout risk).
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      # Backend liveness — no upstream traffic, no KS Fit lockout risk.
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 20s
+      start_period: 25s
     stop_grace_period: 30s
     logging:
       driver: json-file
@@ -37,15 +48,15 @@ services:
         max-file: "3"
 
   # Optional reverse proxy for trusted local HTTPS on the LAN.
-  # Enable with:  docker compose --profile proxy up -d
+  # Enable with:  docker compose --profile proxy up -d --build
   # See docs/DEPLOY.md. Set the host LAN IP in the published ports below.
   caddy:
     image: caddy:2-alpine
-    container_name: ksfit-caddy
+    container_name: stride-caddy
     restart: unless-stopped
     profiles: ["proxy"]
     depends_on:
-      - ksfit
+      - stride
     ports:
       # Bind to the host's LAN IP only (replace 192.168.1.10 with yours).
       - "192.168.1.10:80:80"
@@ -58,5 +69,6 @@ services:
       - no-new-privileges:true
 
 volumes:
+  stride_data:
   caddy_data:
   caddy_config:

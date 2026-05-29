@@ -1,6 +1,14 @@
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const config = {
   output: "standalone",
+  // Monorepo: trace from the workspace root so the standalone bundle includes
+  // the @stride/* workspace packages the web app imports.
+  outputFileTracingRoot: join(__dirname, "../../"),
   reactStrictMode: true,
   images: {
     remotePatterns: [

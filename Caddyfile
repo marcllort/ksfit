@@ -1,15 +1,21 @@
-# Caddyfile for Stride (ksfit) — LAN-only, trusted local HTTPS.
+# Caddyfile for Stride — LAN-only, trusted local HTTPS (host-installed Caddy).
 #
-# Serves the dashboard at https://treadmill.home with a cert from Caddy's
-# internal CA (no browser warnings once the CA is trusted on your devices —
-# see docs/DEPLOY.md step 6). Caddy auto-redirects HTTP→HTTPS and forwards the
-# X-Forwarded-* headers, so Next.js sees the https origin with no code change.
-#
-# This fronts the container, which stays bound to 127.0.0.1:3005 (see
-# docker-compose.yml). Nothing here should ever be exposed to the WAN.
+# Serves https://treadmill.home with a cert from Caddy's internal CA. Splits
+# the front door: /api/* → the backend (Hono on :3001), everything else → the
+# Next.js web app (:3000). Both bind to loopback; only Caddy is on the LAN.
+# See docs/DEPLOY.md.
 
 treadmill.home {
 	tls internal
 	encode zstd gzip
-	reverse_proxy 127.0.0.1:3005
+
+	# Backend API — strip /api so the backend sees /v1/... at its root.
+	handle_path /api/* {
+		reverse_proxy 127.0.0.1:3001
+	}
+
+	# Web app.
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
 }

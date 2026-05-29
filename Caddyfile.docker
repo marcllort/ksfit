@@ -1,11 +1,22 @@
 # Caddyfile for the sibling-container deployment (docker compose --profile proxy).
 #
-# Same as the host Caddyfile, but proxies to the app over the compose network
-# (service name `ksfit`, internal port 3000) instead of the host loopback.
-# See docs/DEPLOY.md → "Optional: run Caddy as a sibling container".
+# Splits the front door: /api/* → the backend (Hono), everything else → the web
+# app (Next.js). Both run in the one `stride` container (web :3000, backend
+# :3001). The backend is mounted under /api, so Caddy strips that prefix.
+# See docs/DEPLOY.md.
 
 treadmill.home {
 	tls internal
 	encode zstd gzip
-	reverse_proxy ksfit:3000
+
+	# Backend API. handle_path strips the /api prefix so the backend sees
+	# /v1/... and /healthz at its root.
+	handle_path /api/* {
+		reverse_proxy stride:3001
+	}
+
+	# Everything else → the Next.js web app.
+	handle {
+		reverse_proxy stride:3000
+	}
 }

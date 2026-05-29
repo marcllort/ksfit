@@ -12,19 +12,25 @@ entire plan is: reachable on the LAN, never on the WAN.
 
 ## 0. Build & run the container
 
+One image runs **two processes**: the Next.js web app (`:3000`) and the Hono
+backend API (`:3001`). Caddy splits the front door — `/api/*` → backend,
+everything else → web.
+
 ```bash
-# Credentials live in web/.env.local (gitignored). docker-compose reads them.
+# Credentials live in apps/web/.env.local (gitignored). Generate a token key:
+#   openssl rand -hex 32   → add to apps/web/.env.local as TOKEN_ENC_KEY=...
 docker compose up --build -d
 ```
 
-The container binds to `127.0.0.1:3005` only (see `docker-compose.yml`) — it is
-**not** reachable from the LAN yet. Caddy (below) is what exposes it, with TLS.
+Both ports bind to `127.0.0.1` only (see `docker-compose.yml`) — **not**
+reachable from the LAN yet. Caddy (below) is what exposes it, with TLS.
 
-Verify it's loopback-bound (should show `127.0.0.1:3005`, not `0.0.0.0`):
+Verify loopback-bound and both processes live:
 
 ```bash
-ss -ltnp | grep 3005
-curl -s localhost:3005/api/health   # -> {"status":"ok"}
+ss -ltnp | grep -E '3000|3001'          # both on 127.0.0.1
+curl -s localhost:3001/healthz          # backend → {"status":"ok"}
+curl -s -o /dev/null -w '%{http_code}\n' localhost:3000   # web → 200
 ```
 
 ---
@@ -70,13 +76,15 @@ sudo apt update && sudo apt install -y caddy
 
 ## 4. Use the bundled Caddyfile
 
-A ready `Caddyfile` lives at the repo root:
+A ready `Caddyfile` lives at the repo root — it splits `/api` → backend and
+the rest → web:
 
 ```caddyfile
 treadmill.home {
 	tls internal
 	encode zstd gzip
-	reverse_proxy 127.0.0.1:3005
+	handle_path /api/* { reverse_proxy 127.0.0.1:3001 }
+	handle           { reverse_proxy 127.0.0.1:3000 }
 }
 ```
 
@@ -95,7 +103,7 @@ for `treadmill.home` from its **internal CA**, and proxies to the container.
 
 ```bash
 sudo ufw allow 80,443/tcp
-# Do NOT open 3005 — it's loopback-only and must stay that way.
+# Do NOT open 3000/3001 — they are loopback-only and must stay that way.
 ```
 
 ## 6. Trust the local CA on your devices (one-time)
@@ -119,7 +127,7 @@ This is what removes the certificate warning. Caddy's root CA lives at:
 
 ## 7. Lock the perimeter (UniFi)
 
-- **Port Forwarding:** confirm there is **no** rule sending 80/443/3005 to the
+- **Port Forwarding:** confirm there is **no** rule sending 80/443/3000/3001 to the
   host. (There should be none.)
 - **Disable UPnP** (Settings → Internet/Network) so nothing self-publishes.
 - Do **not** create a public DNS record for this hostname.
