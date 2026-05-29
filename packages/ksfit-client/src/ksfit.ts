@@ -49,9 +49,11 @@ async function post(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body,
-    // KS Fit responses are user-specific; never let Next cache them at the
-    // fetch layer (we cache one layer up, keyed on xjid, in lib/cache.ts).
-    cache: "no-store",
+    // KS Fit responses are user-specific; never cache them at the fetch layer
+    // (we cache one layer up, keyed on xjid). `cache` is a fetch option Next
+    // honours and plain Node ignores; set via an extra-field cast so this
+    // package typechecks under both lib.dom and @types/node.
+    ...({ cache: "no-store" } as RequestInit),
   });
   if (process.env.KSFIT_TRACE) {
     console.log(

@@ -9,6 +9,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { requestId } from "./middleware/request-id.ts";
 import { ApiError, apiError } from "./lib/errors.ts";
+import { exportRoutes } from "./routes/export.ts";
 
 type Env = { Variables: { requestId: string } };
 
@@ -18,6 +19,9 @@ app.use("*", requestId);
 
 // Liveness probe — cheap, never touches upstreams.
 app.get("/healthz", (c) => c.json({ status: "ok" }));
+
+// CSV exports (v1). See docs/architecture/02-API-CONTRACT.md.
+app.route("/v1/export", exportRoutes);
 
 // Centralized error envelope.
 app.onError((err, c) => {
