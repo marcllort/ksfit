@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireSession } from "@/lib/session";
 import { fetchSessions } from "@/lib/fetchers";
-import { fitbitProvider, FitbitRateLimitError } from "@/lib/health/fitbit/provider";
+import { fitbitProvider } from "@/lib/health/fitbit/web-store";
+import { FitbitRateLimitError } from "@stride/health-core";
 import { fitbitConfigured } from "@/lib/health/fitbit/tokens";
 import { loggedSet, rememberLogged } from "@/lib/health/fitbit/logged";
 import { NotConnectedError } from "@stride/health-core";
@@ -39,7 +40,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const result = await fitbitProvider().logActivity({
+    const provider = await fitbitProvider();
+    const result = await provider.logActivity({
       start: s.startTime,
       durationSec: s.durationSec,
       distanceM: s.distanceM,

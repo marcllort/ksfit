@@ -19,8 +19,13 @@ import {
   type SleepSummary,
   type WeightReading,
   NotConnectedError,
-} from "@stride/health-core";
-import { getFreshTokens, refreshTokens, getTokens, type FitbitTokens } from "./tokens";
+} from "../types";
+import {
+  getFreshTokens,
+  refreshTokens,
+  type FitbitTokens,
+  type TokenStore,
+} from "./oauth";
 
 const API = "https://api.fitbit.com";
 
@@ -36,8 +41,11 @@ export class FitbitRateLimitError extends Error {
 export class FitbitProvider implements HealthProvider {
   readonly name = "Fitbit";
 
+  /** Token persistence is injected (cookie store now, DB store in Phase 2). */
+  constructor(private readonly store: TokenStore) {}
+
   async isConnected(): Promise<boolean> {
-    return (await getTokens()) !== null;
+    return (await this.store.get()) !== null;
   }
 
   /** Authenticated request with one refresh-and-retry on 401. */
@@ -46,7 +54,7 @@ export class FitbitProvider implements HealthProvider {
     init: RequestInit = {},
     retried = false,
   ): Promise<T> {
-    const tokens = await getFreshTokens();
+    const tokens = await getFreshTokens(this.store);
     if (!tokens) throw new NotConnectedError(this.name);
     return this.callWith<T>(tokens, path, init, retried);
   }
@@ -62,14 +70,14 @@ export class FitbitProvider implements HealthProvider {
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`,
         Accept: "application/json",
-        "Accept-Language": "en_US", // metric vs imple controlled separately; en_US default
+        "Accept-Language": "en_US", // metric vs imperial controlled separately; en_US default
         ...(init.headers || {}),
       },
-      cache: "no-store",
+      ...({ cache: "no-store" } as RequestInit),
     });
 
     if (res.status === 401 && !retried) {
-      const refreshed = await refreshTokens(tokens).catch(() => null);
+      const refreshed = await refreshTokens(this.store, tokens).catch(() => null);
       if (!refreshed) throw new NotConnectedError(this.name);
       return this.callWith<T>(refreshed, path, init, true);
     }
@@ -221,10 +229,5 @@ export class FitbitProvider implements HealthProvider {
     };
   }
 }
-
-/** Singleton accessor — the provider is stateless (tokens come from cookies). */
-let _provider: FitbitProvider | null = null;
-export function fitbitProvider(): FitbitProvider {
-  if (!_provider) _provider = new FitbitProvider();
-  return _provider;
-}
+// The provider is constructed per request with an injected TokenStore — see
+// the host's fitbit store factory (no module-level singleton).

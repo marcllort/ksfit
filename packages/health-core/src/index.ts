@@ -11,3 +11,6 @@
  * persistence) live in subpaths and are imported only by server code.
  */
 export * from "./types";
+export * from "./fitbit/oauth";
+export * from "./fitbit/pkce";
+export { FitbitProvider, FitbitRateLimitError } from "./fitbit/provider";

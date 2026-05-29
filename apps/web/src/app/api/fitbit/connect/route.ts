@@ -9,7 +9,7 @@ import {
   generateVerifier,
   challengeFromVerifier,
   randomState,
-} from "@/lib/health/fitbit/pkce";
+} from "@stride/health-core";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

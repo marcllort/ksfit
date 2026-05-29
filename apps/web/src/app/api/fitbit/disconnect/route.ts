@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { clearTokens } from "@/lib/health/fitbit/tokens";
+import { webTokenStore } from "@/lib/health/fitbit/web-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Forget the stored Fitbit tokens (local only; doesn't revoke at Fitbit). */
 export async function POST() {
-  await clearTokens();
+  (await webTokenStore()).clear();
   return NextResponse.json({ ok: true });
 }

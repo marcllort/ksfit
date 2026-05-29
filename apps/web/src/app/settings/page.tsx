@@ -8,7 +8,7 @@ import { fmtDate } from "@stride/ksfit-client/data";
 import { SETTINGS, type SettingId } from "@/lib/settings/definitions";
 import { getAllSettings } from "@/lib/settings/server";
 import { fitbitConfigured } from "@/lib/health/fitbit/tokens";
-import { fitbitProvider } from "@/lib/health/fitbit/provider";
+import { fitbitProvider } from "@/lib/health/fitbit/web-store";
 import { HardDrive } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export default async function SettingsPage() {
   const ids = Object.keys(SETTINGS) as SettingId[];
   const boundDevices = devices?.list ?? [];
   const fitbitConnected = fitbitConfigured
-    ? await fitbitProvider().isConnected()
+    ? await (await fitbitProvider()).isConnected()
     : false;
 
   return (
