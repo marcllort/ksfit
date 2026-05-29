@@ -30,7 +30,7 @@ coachRoutes.post("/chat", async (c) => {
     return apiError(c, "invalid_request", "messages[] required");
   }
 
-  const service = new MetricsService(fitbitForRequest(c));
+  const service = new MetricsService(await fitbitForRequest(c));
   const dataSource = metricsDataSource(service);
 
   // Compact daily snapshot for the cache-marked prompt prefix (best-effort).

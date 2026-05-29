@@ -21,7 +21,7 @@ function dateOf(c: { req: { query: (k: string) => string | undefined } }): strin
 
 exerciseRoutes.get("/", async (c) => {
   try {
-    const list = await fitbitForRequest(c).getExercises(dateOf(c));
+    const list = await (await fitbitForRequest(c)).getExercises(dateOf(c));
     return c.json({
       items: list.map((e) => ({
         id: e.id,
@@ -47,7 +47,7 @@ exerciseRoutes.get("/:id", async (c) => {
   try {
     // Exercises are keyed by day on the Fitbit list endpoint; find within the
     // requested day (the client passes ?date= from the list item).
-    const list = await fitbitForRequest(c).getExercises(dateOf(c));
+    const list = await (await fitbitForRequest(c)).getExercises(dateOf(c));
     const e = list.find((x) => x.id === id);
     if (!e) return apiError(c, "not_found", "Exercise not found.");
     return c.json({
@@ -71,7 +71,7 @@ exerciseRoutes.get("/:id", async (c) => {
 
 profileRoutes.get("/", async (c) => {
   try {
-    const p = await fitbitForRequest(c).getProfile();
+    const p = await (await fitbitForRequest(c)).getProfile();
     return c.json(p ?? {});
   } catch (e) {
     if (e instanceof NotConnectedError) {

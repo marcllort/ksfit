@@ -26,7 +26,7 @@ async function withMetrics<T>(
   fn: (m: MetricsService) => Promise<T>,
 ): Promise<Response> {
   try {
-    const result = await fn(new MetricsService(fitbitForRequest(c)));
+    const result = await fn(new MetricsService(await fitbitForRequest(c)));
     return c.json(result as object);
   } catch (e) {
     if (e instanceof NotConnectedError) {

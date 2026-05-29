@@ -15,7 +15,7 @@ import {
   NotConnectedError,
   FitbitRateLimitError,
 } from "@stride/health-core";
-import { cookieTokenStore, fitbitForRequest } from "../lib/fitbit/store.ts";
+import { tokenStoreForRequest, fitbitForRequest } from "../lib/fitbit/store.ts";
 import { loggedSet, rememberLogged } from "../lib/fitbit/logged.ts";
 import { requireSession } from "../lib/ksfit/session.ts";
 import { fetchSessions } from "../lib/ksfit/fetchers.ts";
@@ -78,15 +78,15 @@ fitbitRoutes.get("/callback", async (c) => {
   }
 
   try {
-    await exchangeCode(cookieTokenStore(c), code, verifier);
+    await exchangeCode(await tokenStoreForRequest(c), code, verifier);
     return settings("connected");
   } catch {
     return settings("error");
   }
 });
 
-fitbitRoutes.post("/disconnect", (c) => {
-  cookieTokenStore(c).clear();
+fitbitRoutes.post("/disconnect", async (c) => {
+  (await tokenStoreForRequest(c)).clear();
   return c.json({ ok: true });
 });
 
@@ -118,7 +118,8 @@ fitbitRoutes.post("/log", async (c) => {
   if (!s) return apiError(c, "not_found", "session not found");
 
   try {
-    const result = await fitbitForRequest(c).logActivity({
+    const provider = await fitbitForRequest(c);
+    const result = await provider.logActivity({
       start: s.startTime,
       durationSec: s.durationSec,
       distanceM: s.distanceM,
