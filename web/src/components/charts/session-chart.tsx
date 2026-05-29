@@ -13,6 +13,8 @@ import type { SessionPoint } from "@/lib/data";
 
 interface Props {
   points: SessionPoint[];
+  /** Optional heart-rate overlay, keyed by elapsed seconds (from Fitbit). */
+  hr?: { t: number; bpm: number }[];
 }
 
 function fmtTime(sec: number) {
@@ -21,11 +23,20 @@ function fmtTime(sec: number) {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-export function SessionChart({ points }: Props) {
+export function SessionChart({ points, hr }: Props) {
+  const hasHr = !!hr && hr.length > 0;
+  // Nearest-neighbour HR lookup so the overlay aligns with telemetry samples.
+  const hrAt = (t: number): number | null => {
+    if (!hasHr) return null;
+    let best = hr![0];
+    for (const p of hr!) if (Math.abs(p.t - t) < Math.abs(best.t - t)) best = p;
+    return Math.abs(best.t - t) <= 60 ? best.bpm : null;
+  };
   const data = points.map((p) => ({
     t: p.t,
     speed: Number(p.speedKmh.toFixed(2)),
     cadence: p.cadence || null,
+    hr: hrAt(p.t),
   }));
 
   return (
@@ -74,6 +85,19 @@ export function SessionChart({ points }: Props) {
           tick={{ fontSize: 11, fill: "var(--ink-4)" }}
           width={36}
         />
+        {hasHr ? (
+          <YAxis
+            yAxisId="hr"
+            orientation="right"
+            domain={["dataMin - 5", "dataMax + 5"]}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(v) => `${v}`}
+            tick={{ fontSize: 11, fill: "var(--bad)" }}
+            width={32}
+            hide
+          />
+        ) : null}
         <Tooltip
           contentStyle={{
             background: "var(--paper-1)",
@@ -86,6 +110,7 @@ export function SessionChart({ points }: Props) {
           formatter={(v: number, name: string) => {
             if (name === "speed") return [`${v} km/h`, "Speed"];
             if (name === "cadence") return [`${v} spm`, "Cadence"];
+            if (name === "hr") return [`${v} bpm`, "Heart rate"];
             return [v, name];
           }}
         />
@@ -109,6 +134,17 @@ export function SessionChart({ points }: Props) {
           dot={false}
           connectNulls
         />
+        {hasHr ? (
+          <Line
+            yAxisId="hr"
+            type="monotone"
+            dataKey="hr"
+            stroke="var(--bad)"
+            strokeWidth={2}
+            dot={false}
+            connectNulls
+          />
+        ) : null}
       </ComposedChart>
     </ResponsiveContainer>
   );

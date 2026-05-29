@@ -6,13 +6,17 @@ import {
   Flame,
   Footprints,
   Gauge,
+  HeartPulse,
   Route,
   Timer,
 } from "lucide-react";
 import { Shell } from "@/components/shell";
 import { Card, CardHeader, Metric, Pill, Empty } from "@/components/ui";
 import { ExportButton } from "@/components/export-button";
+import { FitbitPushButton } from "@/components/fitbit/push-button";
 import { SessionChart } from "@/components/charts/session-chart";
+import { fitbitConnected, fitbitHeartRateForDay } from "@/lib/health/fetchers";
+import { isLogged } from "@/lib/health/fitbit/logged";
 import { requireSession } from "@/lib/session";
 import { fetchRecordPoints, fetchSessions } from "@/lib/fetchers";
 import {
@@ -48,6 +52,31 @@ export default async function SessionDetailPage({
   if (!s) notFound();
 
   const points: SessionPoint[] = parsePointList(pointsResp);
+
+  // Trustworthy heart rate from Fitbit (the KS Fit `heart` field is ambiguously
+  // scaled). Fetch the session day's intraday series and window it to the
+  // workout's start/end. Fails soft to null when Fitbit isn't connected.
+  const dayKeyUtc = s.startTime.toISOString().slice(0, 10);
+  const fitbitHr = await fitbitHeartRateForDay(dayKeyUtc, true);
+  const hrInWindow =
+    fitbitHr?.intraday.filter(
+      (p) => p.t >= s.startTime.getTime() && p.t <= s.endTime.getTime(),
+    ) ?? [];
+  const hr = {
+    points: hrInWindow.map((p) => ({ t: p.t, bpm: p.bpm })),
+    avg: hrInWindow.length
+      ? Math.round(hrInWindow.reduce((a, p) => a + p.bpm, 0) / hrInWindow.length)
+      : 0,
+    peak: hrInWindow.length ? Math.max(...hrInWindow.map((p) => p.bpm)) : 0,
+  };
+  // Map HR onto the telemetry timeline (elapsed seconds) for the chart overlay.
+  const hrByElapsed = hr.points.map((p) => ({
+    t: Math.round((p.t - s.startTime.getTime()) / 1000),
+    bpm: p.bpm,
+  }));
+
+  const fbConnected = await fitbitConnected();
+  const alreadyLogged = fbConnected ? await isLogged(run_id) : false;
 
   // Splits (per-km). Walk through the cumulative-distance time series.
   type Split = { km: number; durationSec: number; pace: number };
@@ -142,12 +171,17 @@ export default async function SessionDetailPage({
               {s.isAppleWatch ? <Pill tone="default">Apple Watch</Pill> : null}
               {s.courseName ? <Pill tone="accent">{s.courseName}</Pill> : null}
             </div>
-            {points.length > 0 ? (
-              <ExportButton
-                href={`/api/export/points/${run_id}`}
-                label="Export telemetry"
-              />
-            ) : null}
+            <div className="flex flex-wrap justify-end gap-2">
+              {fbConnected ? (
+                <FitbitPushButton runId={run_id} alreadyLogged={alreadyLogged} />
+              ) : null}
+              {points.length > 0 ? (
+                <ExportButton
+                  href={`/api/export/points/${run_id}`}
+                  label="Export telemetry"
+                />
+              ) : null}
+            </div>
           </div>
         </div>
       </header>
@@ -159,7 +193,11 @@ export default async function SessionDetailPage({
         <Card className="p-0"><Metric label="Pace" value={fmtPace(s.paceSecPerKm)} unit="/km" icon={<Clock className="h-4 w-4"/>} /></Card>
         <Card className="p-0"><Metric label="Steps" value={fmtSteps(s.steps)} icon={<Footprints className="h-4 w-4"/>} /></Card>
         <Card className="p-0"><Metric label="Calories" value={fmtKcal(s.kcal)} unit="kcal" icon={<Flame className="h-4 w-4"/>} /></Card>
-        <Card className="p-0"><Metric label="Peak speed" value={peakSpeed.toFixed(1)} unit="km/h" icon={<Gauge className="h-4 w-4"/>} /></Card>
+        {hr.avg > 0 ? (
+          <Card className="p-0"><Metric label="Avg HR" value={hr.avg} unit="bpm" sub={`peak ${hr.peak}`} icon={<HeartPulse className="h-4 w-4"/>} /></Card>
+        ) : (
+          <Card className="p-0"><Metric label="Peak speed" value={peakSpeed.toFixed(1)} unit="km/h" icon={<Gauge className="h-4 w-4"/>} /></Card>
+        )}
       </section>
 
       {/* Chart */}
@@ -179,7 +217,7 @@ export default async function SessionDetailPage({
         />
         <div className="px-2 pb-4">
           {points.length > 1 ? (
-            <SessionChart points={points} />
+            <SessionChart points={points} hr={hrByElapsed} />
           ) : (
             <Empty>
               {pointsResp === null

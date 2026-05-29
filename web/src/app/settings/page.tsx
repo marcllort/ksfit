@@ -1,10 +1,14 @@
+import { Suspense } from "react";
 import { Shell } from "@/components/shell";
 import { Card, CardHeader } from "@/components/ui";
 import { SettingCard } from "@/components/settings/setting-card";
+import { FitbitConnectCard } from "@/components/fitbit/connect-card";
 import { fetchAll } from "@/lib/fetchers";
 import { fmtDate } from "@/lib/data";
 import { SETTINGS, type SettingId } from "@/lib/settings/definitions";
 import { getAllSettings } from "@/lib/settings/server";
+import { fitbitConfigured } from "@/lib/health/fitbit/tokens";
+import { fitbitProvider } from "@/lib/health/fitbit/provider";
 import { HardDrive } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +20,9 @@ export default async function SettingsPage() {
   ]);
   const ids = Object.keys(SETTINGS) as SettingId[];
   const boundDevices = devices?.list ?? [];
+  const fitbitConnected = fitbitConfigured
+    ? await fitbitProvider().isConnected()
+    : false;
 
   return (
     <Shell userName={user.nickname || "Athlete"} userAvatar={user.avatar}>
@@ -31,6 +38,15 @@ export default async function SettingsPage() {
           your session and reset when you clear site data. Nothing is synced
           back to KS Fit.
         </p>
+      </section>
+
+      <section className="mb-8">
+        <Suspense fallback={null}>
+          <FitbitConnectCard
+            configured={fitbitConfigured}
+            connected={fitbitConnected}
+          />
+        </Suspense>
       </section>
 
       <section className="space-y-4">

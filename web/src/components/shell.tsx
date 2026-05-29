@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, CalendarDays, Footprints, LineChart } from "lucide-react";
+import { Activity, CalendarDays, Footprints, HeartPulse, LineChart } from "lucide-react";
 import { ThemeToggle } from "./theme";
 import { LogoTile } from "./logo";
 import { UserMenu } from "./user-menu";
@@ -18,6 +18,7 @@ const nav = [
   { href: "/sessions", label: "Sessions", icon: Footprints },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/weight", label: "Weight", icon: LineChart },
+  { href: "/fitbit", label: "Fitbit", icon: HeartPulse },
 ];
 
 export function Shell({ userName, userAvatar, children }: Props) {

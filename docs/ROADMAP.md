@@ -15,6 +15,27 @@
 
 ---
 
+## Batch 7 — Fitbit integration (health hub)  ✅ *(done — branch `fitbit-integration`)*
+
+Turns Stride into a broader health dashboard. All Fitbit-specific code lives in
+`web/src/lib/health/` behind a `HealthProvider` interface, so swapping to the
+**Google Health API** before Fitbit's **Sept 2026** Web API sunset is localized.
+Setup: **docs/FITBIT.md** (register a "Personal" app → env → connect in Settings).
+
+| Item | Status |
+| --- | --- |
+| OAuth 2.0 + PKCE flow, token storage + refresh (`/api/fitbit/connect|callback|disconnect`) | ✅ |
+| `HealthProvider` interface + `FitbitProvider` REST client (HR, sleep, activity, weight, logActivity) | ✅ |
+| **Trustworthy HR** on session detail — Fitbit intraday HR overlaid on the chart + avg/peak KPI (replaces the ambiguous KS Fit `heart` field) | ✅ |
+| **Push walks to Fitbit** — `POST activities` with per-session button + dedupe | ✅ |
+| **Fitbit data tab** (`/fitbit`) — resting HR, steps, active min, sleep, HR zones, 7-day table | ✅ |
+| Settings connection card (connect/disconnect/status) | ✅ |
+| Gracefully no-ops when `FITBIT_CLIENT_ID` unset | ✅ |
+
+**Not possible / out of scope (verified):** Google Fit REST (closed to new devs, dies end-2026); Health Connect (on-device Android only, no server API — would need a phone bridge app). Forward path is Fitbit-now → Google Health API later.
+
+---
+
 ## Batch 1 — Stabilize & secure  ✅ *(done — commit on `stabilize-and-fixes`)*
 | Item | Status | File |
 | --- | --- | --- |
@@ -68,7 +89,7 @@ Add a `caddy:2-alpine` service, drop the app's `ports:` block, set `reverse_prox
 | **CSV export** (sessions / weight / per-session points) + buttons | **The project's founding motivation** — currently absent | M |
 | **Render bound devices** on Settings (model, name, bind date) | Already fetched in `fetchAll`, just not shown (or drop the fetch) | S |
 | **Body-composition card** on Weight page (fat%, water, BMR, visceral, muscle) | Smart-scale data already uploaded; `normalizeWeights` drops most of it | M |
-| **Heart-rate UI** (avg/peak per session, HR line on chart, HR-zone bar via `220−age`) | ⚠️ **BLOCKED** — real sessions report `heart` as 1035–1211 (implausible BPM; likely BPM×10 → 103–121). Field scale unverified and can't safely probe the live API (rate-limit). Confirm the scale with ONE safe call before building, or this risks showing wrong vital-sign data. | M |
+| **Heart-rate UI** | ✅ **Solved via Fitbit (Batch 7)** — the KS Fit `heart` field was ambiguously scaled (1035–1211, likely ×10), so HR now comes from Fitbit's trustworthy intraday data instead. | — |
 | **Per-scheme PWA theme-color** | `manifest.ts` is hardcoded dark; clashes in light mode | S |
 
 ---
