@@ -4,3 +4,4 @@
  * truth; the OpenAPI spec is emitted from them.
  */
 export * from "./errors";
+export * from "./schemas";

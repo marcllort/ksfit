@@ -57,6 +57,87 @@ export interface WeightReading {
   fatPct?: number;
 }
 
+/**
+ * Daily HRV summary (overnight RMSSD). Fitbit reports a single nightly value
+ * computed during deep sleep; `coverage` (0-1) reflects how much of the night
+ * had usable data, when the provider exposes it.
+ */
+export interface HrvReading {
+  date: string; // YYYY-MM-DD (the wake date)
+  /** Root mean square of successive differences, milliseconds. */
+  rmssd: number;
+  /** Fraction of the night with usable data, 0-1, if provided. */
+  coverage?: number;
+}
+
+/** Overnight breathing (respiratory) rate. */
+export interface BreathingReading {
+  date: string; // YYYY-MM-DD
+  breathsPerMin: number;
+}
+
+/** Overnight blood-oxygen saturation. */
+export interface Spo2Reading {
+  date: string; // YYYY-MM-DD
+  avgPct: number;
+  minPct?: number;
+}
+
+/**
+ * Overnight skin temperature, reported by Fitbit as a deviation from the
+ * personal baseline (degrees Celsius), not an absolute temperature.
+ */
+export interface SkinTempReading {
+  date: string; // YYYY-MM-DD
+  /** Deviation from baseline, °C (can be negative). */
+  relativeC: number;
+}
+
+/**
+ * Cardio-fitness score (VO2max estimate). Fitbit may report either a single
+ * value or a range when it lacks a recent GPS run to pin it down.
+ */
+export interface CardioScore {
+  date: string; // YYYY-MM-DD
+  /** VO2max, ml/kg/min. When the provider gives a range, the midpoint. */
+  vo2max: number;
+  range?: { low: number; high: number };
+}
+
+/**
+ * A detected or manually-logged workout with HR summary. `source: 'auto'`
+ * marks Fitbit SmartTrack auto-detection vs a manually-logged session.
+ */
+export interface Exercise {
+  /** Stable provider id for the logged activity. */
+  id: string;
+  /** Start instant (UTC). */
+  startTime: Date;
+  durationSec: number;
+  /** Activity type/name, e.g. "Walk", "Run", "Weights". */
+  type: string;
+  distanceM?: number;
+  /** kcal. */
+  calories?: number;
+  avgHr?: number;
+  /** Time-in-zone breakdown when the provider supplies it. */
+  hrZones?: HeartRateZone[];
+  source: "auto" | "manual";
+}
+
+/**
+ * Static user attributes needed to compute honest metrics (HRmax, fitness age,
+ * BMR, norm-table lookups). Every field optional — captured progressively.
+ */
+export interface UserProfile {
+  /** Years; provider may report it directly or via DOB. */
+  age?: number;
+  sex?: "male" | "female" | "unspecified";
+  heightCm?: number;
+  weightKg?: number;
+  waistCm?: number;
+}
+
 /** A walk/treadmill session to push to the external service. */
 export interface ActivityLogInput {
   /** Start instant (UTC). */
@@ -91,6 +172,19 @@ export interface HealthProvider {
   getWeightLog(fromDate: string, toDate: string): Promise<WeightReading[]>;
 
   logActivity(input: ActivityLogInput): Promise<ActivityLogResult>;
+
+  /**
+   * New signals that gate WHOOP-style metrics. All fail soft: return null/[]
+   * when the field is absent (many are device-dependent) rather than throwing.
+   */
+  getHrv(date: string): Promise<HrvReading | null>;
+  getBreathingRate(date: string): Promise<BreathingReading | null>;
+  getSpo2(date: string): Promise<Spo2Reading | null>;
+  getSkinTemp(date: string): Promise<SkinTempReading | null>;
+  getCardioScore(date: string): Promise<CardioScore | null>;
+  /** Detected + manual workouts logged on the given day. */
+  getExercises(date: string): Promise<Exercise[]>;
+  getProfile(): Promise<UserProfile | null>;
 }
 
 export class NotConnectedError extends Error {

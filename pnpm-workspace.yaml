@@ -1,11 +1,5 @@
 packages:
   - "apps/*"
   - "packages/*"
-
 allowBuilds:
-  esbuild: set this to true or false
-
-onlyBuiltDependencies:
-  - sharp
-  - unrs-resolver
-  - esbuild
+  better-sqlite3: set this to true or false

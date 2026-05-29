@@ -12,11 +12,18 @@
 import {
   type ActivityLogInput,
   type ActivityLogResult,
+  type BreathingReading,
+  type CardioScore,
   type DailyActivity,
   type DayHeartRate,
+  type Exercise,
   type HealthProvider,
   type HeartRatePoint,
+  type HrvReading,
+  type SkinTempReading,
   type SleepSummary,
+  type Spo2Reading,
+  type UserProfile,
   type WeightReading,
   NotConnectedError,
 } from "../types";
@@ -26,6 +33,22 @@ import {
   type FitbitTokens,
   type TokenStore,
 } from "./oauth";
+import {
+  normalizeBreathing,
+  normalizeCardioScore,
+  normalizeExercises,
+  normalizeHrv,
+  normalizeProfile,
+  normalizeSkinTemp,
+  normalizeSpo2,
+  type RawActivityListResp,
+  type RawBreathingResp,
+  type RawCardioScoreResp,
+  type RawHrvResp,
+  type RawProfileResp,
+  type RawSkinTempResp,
+  type RawSpo2Resp,
+} from "./normalize";
 
 const API = "https://api.fitbit.com";
 
@@ -92,6 +115,26 @@ export class FitbitProvider implements HealthProvider {
     // logActivity returns 201 with a body; some endpoints may 204.
     if (res.status === 204) return {} as T;
     return (await res.json()) as T;
+  }
+
+  /**
+   * Fail-soft GET for device-dependent signals. Returns null when the field is
+   * simply absent (404 / empty body) — many of these signals require a
+   * compatible device or a night of data and are legitimately missing.
+   * Authentication failures still surface as NotConnectedError, and rate
+   * limiting still surfaces as FitbitRateLimitError (both thrown by call()).
+   */
+  private async callSoft<T>(path: string): Promise<T | null> {
+    try {
+      return await this.call<T>(path);
+    } catch (err) {
+      if (err instanceof NotConnectedError || err instanceof FitbitRateLimitError) {
+        throw err;
+      }
+      // Any other upstream error (404 absent feature, malformed payload) is
+      // treated as "feature off" so callers degrade gracefully.
+      return null;
+    }
   }
 
   async getHeartRateForDay(
@@ -227,6 +270,62 @@ export class FitbitProvider implements HealthProvider {
       externalId: j.activityLog?.logId ? String(j.activityLog.logId) : null,
       alreadyLogged: false,
     };
+  }
+
+  async getHrv(date: string): Promise<HrvReading | null> {
+    const j = await this.callSoft<RawHrvResp>(`/1/user/-/hrv/date/${date}.json`);
+    return j ? normalizeHrv(j, date) : null;
+  }
+
+  async getBreathingRate(date: string): Promise<BreathingReading | null> {
+    const j = await this.callSoft<RawBreathingResp>(
+      `/1/user/-/br/date/${date}.json`,
+    );
+    return j ? normalizeBreathing(j, date) : null;
+  }
+
+  async getSpo2(date: string): Promise<Spo2Reading | null> {
+    const j = await this.callSoft<RawSpo2Resp>(
+      `/1/user/-/spo2/date/${date}.json`,
+    );
+    return j ? normalizeSpo2(j, date) : null;
+  }
+
+  async getSkinTemp(date: string): Promise<SkinTempReading | null> {
+    const j = await this.callSoft<RawSkinTempResp>(
+      `/1/user/-/temp/skin/date/${date}.json`,
+    );
+    return j ? normalizeSkinTemp(j, date) : null;
+  }
+
+  async getCardioScore(date: string): Promise<CardioScore | null> {
+    const j = await this.callSoft<RawCardioScoreResp>(
+      `/1/user/-/cardioscore/date/${date}.json`,
+    );
+    return j ? normalizeCardioScore(j, date) : null;
+  }
+
+  async getExercises(date: string): Promise<Exercise[]> {
+    // The activities list is paged by afterDate (inclusive) ascending; to get a
+    // single calendar day we fetch from that day and keep only matching starts.
+    const params = new URLSearchParams({
+      afterDate: date,
+      sort: "asc",
+      limit: "100",
+      offset: "0",
+    });
+    const j = await this.callSoft<RawActivityListResp>(
+      `/1/user/-/activities/list.json?${params.toString()}`,
+    );
+    if (!j) return [];
+    return normalizeExercises(j).filter(
+      (e) => e.startTime.toISOString().slice(0, 10) === date,
+    );
+  }
+
+  async getProfile(): Promise<UserProfile | null> {
+    const j = await this.callSoft<RawProfileResp>(`/1/user/-/profile.json`);
+    return j ? normalizeProfile(j) : null;
   }
 }
 // The provider is constructed per request with an injected TokenStore — see
