@@ -49,3 +49,19 @@ export async function requireSession(): Promise<Session> {
   if (auto) return auto;
   redirect("/login");
 }
+
+/**
+ * Ensure a Session persists any token KS Fit rotates mid-request (ret=402).
+ *
+ * The env auto-login Session already brings its own in-memory `onRotate`, so we
+ * never clobber it (and must not — writing a cookie during a server render
+ * throws). For a cookie-backed Session we install a handler that writes the
+ * fresh JWT back to the cookie, so the next request doesn't re-rotate. Call
+ * this from every data-fetch entry point.
+ */
+export function ensureRotationPersist(session: Session): void {
+  if (session.onRotate) return;
+  session.onRotate = async (token) => {
+    await setSession({ xjid: session.xjid, token });
+  };
+}

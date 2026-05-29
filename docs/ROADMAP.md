@@ -15,22 +15,22 @@
 
 ---
 
-## Batch 1 — Stabilize & secure  *(in progress)*
+## Batch 1 — Stabilize & secure  ✅ *(done — commit on `stabilize-and-fixes`)*
 | Item | Status | File |
 | --- | --- | --- |
-| Upgrade `next` 15.1.4 → **15.5.18** (clears flight-protocol RCE, request smuggling, DoS, transitive postcss XSS) | 🔜 | `web/package.json` |
-| Fix `docker-compose.yml` `env_file` → `web/.env.local` (otherwise container has **no creds**) | 🔜 | `docker-compose.yml` |
-| Fix stale README claim that the web app doesn't read `KSFIT_EMAIL`/`KSFIT_PASSWORD` (it now does, via auto-login) | 🔜 | `README.md` |
-| Add committed ESLint config (`eslint-config-next`) + network-free CI (typecheck + lint + test) | 🔜 | `web/`, `.github/workflows/` |
+| Upgrade `next` 15.1.4 → **15.5.18** (clears flight-protocol RCE, request smuggling, DoS, transitive postcss XSS) → `npm audit` = 0 vulns | ✅ | `web/package.json` |
+| Fix `docker-compose.yml` `env_file` → `web/.env.local` (otherwise container has **no creds**) | ✅ | `docker-compose.yml` |
+| Fix stale README claim that the web app doesn't read `KSFIT_EMAIL`/`KSFIT_PASSWORD` (it now does, via auto-login) | ✅ | `README.md` |
+| Add committed ESLint config (`eslint-config-next`) + network-free CI (typecheck + lint + test) | ✅ | `web/eslint.config.mjs`, `.github/workflows/ci.yml` |
 
-## Batch 2 — Correctness + test safety net  *(in progress)*
+## Batch 2 — Correctness + test safety net  *(mostly done)*
 | Item | Status | File |
 | --- | --- | --- |
-| Add Vitest + unit tests for `data.ts` (normalizeSession, parsePointList, dayKey/groupByDay, currentStreak) | 🔜 | `web/src/lib/__tests__/` |
-| Reconcile `consume` kcal scale — code `/1000` is **verified correct** (point-list cross-check); fix the stale `×10` comments and add a `CONSUME_SCALE` constant | 🔜 | `data.ts`, `ksfit.ts`, `client.py` |
-| Unify UTC-vs-local timestamp rendering behind one formatter (sessions can currently display under a different day than their bucket) | 🔜 | `data.ts`, several pages |
-| Persist token rotation on the session-detail path (`fetchSessions` lacks the `onRotate` handler `fetchAll` has) | 🔜 | `fetchers.ts` |
-| Add `/api/health` route (middleware already excludes it; used for Docker healthcheck) | 🔜 | `web/src/app/api/health/` |
+| Add Vitest + unit tests for `data.ts` (normalizeSession, parsePointList, dayKey/groupByDay, currentStreak) — **20 tests** | ✅ | `web/src/lib/__tests__/data.test.ts` |
+| Reconcile `consume` kcal scale — code `/1000` is **verified correct**; fixed stale `×10` comments and added `CONSUME_SCALE` constant | ✅ | `data.ts`, `ksfit.ts`, `client.py` |
+| Unify UTC-vs-local timestamp rendering behind `fmtDate`/`fmtTime`/`fmtDateTime` | ✅ | `data.ts`, page components |
+| Persist token rotation on all fetch paths via shared `ensureRotationPersist` (`fetchSessions` previously lacked it) | ✅ | `session.ts`, `fetchers.ts` |
+| Add `/api/health` route + compose healthcheck (no KS Fit traffic) | ✅ | `web/src/app/api/health/route.ts`, `docker-compose.yml` |
 
 ---
 

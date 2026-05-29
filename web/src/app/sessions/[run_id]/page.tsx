@@ -13,7 +13,6 @@ import { Shell } from "@/components/shell";
 import { Card, CardHeader, Metric, Pill, Empty } from "@/components/ui";
 import { SessionChart } from "@/components/charts/session-chart";
 import { requireSession } from "@/lib/session";
-import { setSession } from "@/lib/session";
 import { fetchRecordPoints, fetchSessions } from "@/lib/fetchers";
 import {
   fmtDate,
@@ -40,8 +39,7 @@ export default async function SessionDetailPage({
 
   // Session metadata reuses the cached sport-records list; per-session
   // telemetry has its own long-lived cache (record_points are immutable).
-  session.onRotate = async (token) =>
-    setSession({ xjid: session.xjid, token });
+  // fetchSessions installs the rotation-persist handler for both calls below.
   const { user, sessions: all } = await fetchSessions(session);
   const pointsResp = await fetchRecordPoints(session, run_id).catch(() => null);
 

@@ -3,7 +3,7 @@
  * normalize the payload. Pages call these once per request.
  */
 import { ksfit, type SportRecord, type Session } from "./ksfit";
-import { requireSession, setSession } from "./session";
+import { ensureRotationPersist, requireSession } from "./session";
 import { withCache } from "./cache";
 import {
   normalizeAll,
@@ -48,6 +48,7 @@ export async function fetchRecordPoints(session: Session, runId: string) {
  *  weight history or device info. Avoids the heavier `fetchAll()`. */
 export async function fetchSessions(session: Session) {
   if (DEMO) return getDemoSessions();
+  ensureRotationPersist(session);
   const user = await withCache(k(session.xjid, "user"), TTL.user, () =>
     ksfit.userInfo(session),
   );
@@ -69,15 +70,7 @@ export interface DashboardData {
 export async function fetchAll(): Promise<DashboardData> {
   if (DEMO) return getDemoData();
   const session = await requireSession();
-  // Persist rotated tokens (KS Fit's ret=402 issues a fresh JWT) back to the
-  // cookie so we don't re-rotate every request. The env auto-login session
-  // brings its own in-memory onRotate handler — don't clobber it with a
-  // cookie write (setting a cookie during a server render throws).
-  if (!session.onRotate) {
-    session.onRotate = async (token) => {
-      await setSession({ xjid: session.xjid, token });
-    };
-  }
+  ensureRotationPersist(session);
 
   // All four upstream calls go through the in-process cache. A cache hit
   // means zero KS Fit traffic for repeat page renders within the TTL.
