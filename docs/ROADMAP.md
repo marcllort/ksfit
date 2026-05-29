@@ -68,7 +68,7 @@ Add a `caddy:2-alpine` service, drop the app's `ports:` block, set `reverse_prox
 | **CSV export** (sessions / weight / per-session points) + buttons | **The project's founding motivation** — currently absent | M |
 | **Render bound devices** on Settings (model, name, bind date) | Already fetched in `fetchAll`, just not shown (or drop the fetch) | S |
 | **Body-composition card** on Weight page (fat%, water, BMR, visceral, muscle) | Smart-scale data already uploaded; `normalizeWeights` drops most of it | M |
-| **Heart-rate UI** (avg/peak per session, HR line on chart, HR-zone bar via `220−age`) | `heartAvg` normalized + `HeartPulse` icon imported but **never rendered** — biggest unrealized value | M |
+| **Heart-rate UI** (avg/peak per session, HR line on chart, HR-zone bar via `220−age`) | ⚠️ **BLOCKED** — real sessions report `heart` as 1035–1211 (implausible BPM; likely BPM×10 → 103–121). Field scale unverified and can't safely probe the live API (rate-limit). Confirm the scale with ONE safe call before building, or this risks showing wrong vital-sign data. | M |
 | **Per-scheme PWA theme-color** | `manifest.ts` is hardcoded dark; clashes in light mode | S |
 
 ---

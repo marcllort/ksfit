@@ -125,7 +125,15 @@ Light mode is also supported:
 docker compose up --build
 ```
 
-The bundled `docker-compose.yml` builds the Next.js app and serves it on `:3000`.
+The bundled `docker-compose.yml` builds the Next.js app and binds it to
+`127.0.0.1:3005` (front it with a reverse proxy).
+
+### Home-network deployment
+
+To serve it on your LAN at a hostname like `treadmill.home` with trusted local
+HTTPS (no browser warnings), see **[docs/DEPLOY.md](docs/DEPLOY.md)** — a
+step-by-step UniFi + Caddy runbook. A ready `Caddyfile` is at the repo root, and
+`docker compose --profile proxy up` runs Caddy as a sibling container.
 
 ## Notes / gotchas
 

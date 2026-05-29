@@ -35,3 +35,28 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  # Optional reverse proxy for trusted local HTTPS on the LAN.
+  # Enable with:  docker compose --profile proxy up -d
+  # See docs/DEPLOY.md. Set the host LAN IP in the published ports below.
+  caddy:
+    image: caddy:2-alpine
+    container_name: ksfit-caddy
+    restart: unless-stopped
+    profiles: ["proxy"]
+    depends_on:
+      - ksfit
+    ports:
+      # Bind to the host's LAN IP only (replace 192.168.1.10 with yours).
+      - "192.168.1.10:80:80"
+      - "192.168.1.10:443:443"
+    volumes:
+      - ./Caddyfile.docker:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  caddy_data:
+  caddy_config:
